@@ -18,7 +18,7 @@ const ProposalPDFViewer = dynamic(
   }
 );
 
-interface Proposal {
+interface Proposal extends Record<string, unknown> {
   _id: string;
   proposalNumber: string;
   leadId?: string;
