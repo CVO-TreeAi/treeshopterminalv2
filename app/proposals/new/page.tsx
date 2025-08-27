@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
@@ -64,7 +64,7 @@ interface ProposalForm {
   }[];
 }
 
-export default function NewProposalPage() {
+function ProposalFormOld() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const leadId = searchParams.get("leadId");
@@ -620,5 +620,13 @@ export default function NewProposalPage() {
       )}
       </DirectoryLayout>
     </AuthenticatedLayout>
+  );
+}
+
+export default function NewProposalPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><div className="text-green-500">Loading...</div></div>}>
+      <ProposalFormOld />
+    </Suspense>
   );
 }
