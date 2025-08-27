@@ -12,7 +12,7 @@ import ProposalStageKPIs from "@/components/kpi/ProposalStageKPIs";
 interface Proposal extends Record<string, unknown> {
   _id: string;
   proposalNumber: string;
-  leadId: string;
+  leadId?: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
