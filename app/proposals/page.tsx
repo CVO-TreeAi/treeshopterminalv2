@@ -26,8 +26,6 @@ interface Proposal extends Record<string, unknown> {
     unitPrice: number;
     total: number;
   }[];
-  subtotal: number;
-  tax: number;
   total: number;
   status: "draft" | "sent" | "viewed" | "approved" | "rejected" | "expired";
   validUntil: number;
@@ -40,83 +38,13 @@ interface Proposal extends Record<string, unknown> {
   updatedAt: number;
 }
 
-// Mock data for now - will connect to Convex
-const mockProposals: Proposal[] = [
-  {
-    _id: "1",
-    proposalNumber: "PROP-2025-001",
-    leadId: "lead1",
-    customerName: "John Smith",
-    customerEmail: "john@example.com",
-    customerPhone: "555-0123",
-    propertyAddress: "123 Oak Street",
-    acreage: 2.5,
-    services: [
-      {
-        service: "Forestry Mulching",
-        description: "Complete forestry mulching of 2.5 acres",
-        quantity: 2.5,
-        unit: "acres",
-        unitPrice: 3000,
-        total: 7500,
-      },
-    ],
-    subtotal: 7500,
-    tax: 600,
-    total: 8100,
-    status: "sent",
-    validUntil: Date.now() + 30 * 24 * 60 * 60 * 1000,
-    version: 1,
-    sentAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
-    createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
-    updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
-  },
-  {
-    _id: "2",
-    proposalNumber: "PROP-2025-002",
-    leadId: "lead2",
-    customerName: "Jane Doe",
-    customerEmail: "jane@example.com",
-    customerPhone: "555-0456",
-    propertyAddress: "456 Pine Road",
-    acreage: 5,
-    services: [
-      {
-        service: "Land Clearing",
-        description: "Complete land clearing and grubbing",
-        quantity: 5,
-        unit: "acres",
-        unitPrice: 5000,
-        total: 25000,
-      },
-      {
-        service: "Debris Hauling",
-        description: "Hauling of cleared debris",
-        quantity: 85,
-        unit: "yards",
-        unitPrice: 23,
-        total: 1955,
-      },
-    ],
-    subtotal: 26955,
-    tax: 2156.4,
-    total: 29111.4,
-    status: "viewed",
-    validUntil: Date.now() + 28 * 24 * 60 * 60 * 1000,
-    version: 2,
-    previousVersionId: "prop2-v1",
-    sentAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
-    viewedAt: Date.now() - 12 * 60 * 60 * 1000,
-    createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
-    updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
-  },
-];
+// No mock data - all data comes from real operations
 
 export default function ProposalsPage() {
   const router = useRouter();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [proposals, setProposals] = useState<Proposal[]>(mockProposals);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
   const [view, setView] = useState<"table" | "kpi">("table");

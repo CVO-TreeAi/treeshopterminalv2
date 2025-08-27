@@ -64,23 +64,7 @@ export default function Home() {
     setLoading(false);
   }, []);
 
-  // Mock proposals data - will be replaced with Convex sync
-  const mockProposals: Proposal[] = [
-    {
-      _id: "1",
-      proposalNumber: "PROP-2025-001",
-      status: "sent",
-      total: 8100,
-      createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
-    },
-    {
-      _id: "2",
-      proposalNumber: "PROP-2025-002",
-      status: "viewed",
-      total: 29111.4,
-      createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
-    },
-  ];
+  // No mock data - all data from real operations
 
   const fetchLeads = async () => {
     try {
@@ -118,7 +102,7 @@ export default function Home() {
   useEffect(() => {
     if (authenticated) {
       fetchLeads();
-      setProposals(mockProposals); // Set mock proposals
+      setProposals([]); // No mock proposals - real data only
       const interval = setInterval(fetchLeads, 10000); // Refresh every 10 seconds
       return () => clearInterval(interval);
     }
