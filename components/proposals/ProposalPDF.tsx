@@ -70,7 +70,6 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   table: {
-    display: 'table',
     width: 'auto',
     marginTop: 10,
     marginBottom: 10,
