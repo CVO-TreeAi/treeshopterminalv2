@@ -132,15 +132,35 @@ function ProposalForm() {
 
   const saveProposal = async (status: "draft" | "sent") => {
     try {
-      // Here we would save to Convex
       const proposalData = {
+        _id: crypto.randomUUID(),
         ...proposal,
         status,
+        customerName: proposal.customerName,
+        customerEmail: proposal.customerEmail,
+        customerPhone: proposal.customerPhone,
+        propertyAddress: proposal.propertyAddress,
+        acreage: proposal.acreage,
+        services: proposal.pricingResult?.breakdown.map((item: any) => ({
+          service: item.item || item.service,
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          total: item.total,
+        })) || [],
+        total: proposal.pricingResult?.total || 0,
+        validUntil: Date.now() + (proposal.validDays * 24 * 60 * 60 * 1000),
+        version: 1,
         updatedAt: Date.now(),
       };
       
-      // For now, just log it
-      console.log("Saving proposal:", proposalData);
+      // Save to localStorage for now (can migrate to Convex later)
+      const existingProposals = JSON.parse(localStorage.getItem('treeShopProposals') || '[]');
+      const updatedProposals = [...existingProposals, proposalData];
+      localStorage.setItem('treeShopProposals', JSON.stringify(updatedProposals));
+      
+      console.log("Proposal saved:", proposalData);
       
       // Generate PDF if sending
       if (status === "sent" && proposal.pricingResult) {
@@ -182,7 +202,6 @@ function ProposalForm() {
       })),
       pricing: {
         subtotal: proposal.pricingResult.subtotal,
-        tax: proposal.pricingResult.tax,
         total: proposal.pricingResult.total,
         deposit: proposal.pricingResult.deposit,
       },
@@ -407,6 +426,7 @@ function ProposalForm() {
               onPricingCalculated={(pricing: PricingResult) => {
                 setProposal(prev => ({ ...prev, pricingResult: pricing }));
               }}
+              onApplyToProposal={() => setCurrentStep(4)}
             />
             
             <div className="mt-6 flex justify-between">
@@ -524,6 +544,7 @@ function ProposalForm() {
         total: item.total,
       })),
                         pricing: {
+                          subtotal: proposal.pricingResult.subtotal,
                           total: proposal.pricingResult.total,
                           deposit: proposal.pricingResult.deposit,
                         },

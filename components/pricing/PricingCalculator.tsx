@@ -11,6 +11,7 @@ interface PricingCalculatorProps {
   serviceType: "forestry-mulching" | "land-clearing" | null;
   acreage: number;
   onPricingCalculated: (pricing: PricingResult) => void;
+  onApplyToProposal?: () => void;
   initialData?: {
     packageId?: string;
     includeHauling?: boolean;
@@ -25,9 +26,6 @@ export interface PricingResult {
   packageName?: string;
   laborCost: number;
   haulingCost: number;
-  subtotal: number;
-  taxRate: number;
-  tax: number;
   total: number;
   deposit: number;
   breakdown: {
@@ -44,6 +42,7 @@ export default function PricingCalculator({
   serviceType,
   acreage,
   onPricingCalculated,
+  onApplyToProposal,
   initialData,
 }: PricingCalculatorProps) {
   const [selectedPackage, setSelectedPackage] = useState(initialData?.packageId || "");
@@ -51,7 +50,6 @@ export default function PricingCalculator({
   const [customRate, setCustomRate] = useState<number | null>(null);
   const [pricing, setPricing] = useState<PricingResult | null>(null);
 
-  const TAX_RATE = 0.08; // 8% Florida sales tax
 
   useEffect(() => {
     calculatePricing();
@@ -65,9 +63,6 @@ export default function PricingCalculator({
       acreage,
       laborCost: 0,
       haulingCost: 0,
-      subtotal: 0,
-      taxRate: TAX_RATE,
-      tax: 0,
       total: 0,
       deposit: 0,
       breakdown: [],
@@ -83,9 +78,7 @@ export default function PricingCalculator({
         result.packageName = pkg.name;
         result.laborCost = basePrice;
         result.haulingCost = 0; // Forestry mulching doesn't include hauling
-        result.subtotal = basePrice;
-        result.tax = result.subtotal * TAX_RATE;
-        result.total = result.subtotal + result.tax;
+        result.total = basePrice;
         result.deposit = calculateDeposit(result.total);
         
         result.breakdown = [
@@ -105,9 +98,7 @@ export default function PricingCalculator({
       
       result.laborCost = clearingPrices.labor;
       result.haulingCost = clearingPrices.hauling;
-      result.subtotal = clearingPrices.total;
-      result.tax = result.subtotal * TAX_RATE;
-      result.total = result.subtotal + result.tax;
+      result.total = clearingPrices.total;
       result.deposit = calculateDeposit(result.total);
       
       const config = treeShopConfig.packages.landClearing;
@@ -244,14 +235,6 @@ export default function PricingCalculator({
           </div>
 
           <div className="mt-4 pt-4 border-t border-gray-700 space-y-2">
-            <div className="flex justify-between">
-              <p>Subtotal</p>
-              <p className="font-medium">${pricing.subtotal.toLocaleString()}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Tax ({(pricing.taxRate * 100).toFixed(0)}%)</p>
-              <p className="font-medium">${pricing.tax.toFixed(2)}</p>
-            </div>
             <div className="flex justify-between text-lg font-bold">
               <p>Total</p>
               <p className="text-green-400">${pricing.total.toFixed(2)}</p>
@@ -290,7 +273,12 @@ export default function PricingCalculator({
           <Button
             variant="primary"
             fullWidth
-            onClick={() => onPricingCalculated(pricing)}
+            onClick={() => {
+              onPricingCalculated(pricing);
+              if (onApplyToProposal) {
+                onApplyToProposal();
+              }
+            }}
           >
             Apply to Proposal
           </Button>

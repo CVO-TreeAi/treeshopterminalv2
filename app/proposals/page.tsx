@@ -49,7 +49,7 @@ export default function ProposalsPage() {
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
   const [view, setView] = useState<"table" | "kpi">("table");
 
-  // Check authentication
+  // Check authentication and load proposals
   useEffect(() => {
     const auth = localStorage.getItem("authenticated");
     const authTime = localStorage.getItem("authTime");
@@ -60,6 +60,9 @@ export default function ProposalsPage() {
       
       if (hoursDiff < 24) {
         setAuthenticated(true);
+        // Load proposals from localStorage
+        const savedProposals = JSON.parse(localStorage.getItem('treeShopProposals') || '[]');
+        setProposals(savedProposals);
       } else {
         router.push("/");
       }

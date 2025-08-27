@@ -150,7 +150,13 @@ const styles = StyleSheet.create({
     bottom: 30,
     left: 40,
     right: 40,
-    textAlign: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: 9,
+    color: '#999',
+  },
+  pageNumber: {
     fontSize: 9,
     color: '#999',
   },
@@ -202,6 +208,7 @@ interface ProposalPDFProps {
       total: number;
     }[];
     pricing: {
+      subtotal?: number;
       total: number;
       deposit: number;
     };
@@ -318,15 +325,21 @@ const ProposalPDFDocument: React.FC<ProposalPDFProps> = ({ proposal }) => {
           {/* Totals */}
           <View style={styles.totalsSection}>
             <View style={[styles.totalRow, styles.grandTotal]}>
-              <Text style={[styles.totalLabel, styles.grandTotal]}>Total:</Text>
+              <Text style={[styles.totalLabel, styles.grandTotal]}>Project Total:</Text>
               <Text style={[styles.totalValue, styles.grandTotal]}>
-                ${proposal.pricing.total.toFixed(2)}
+                ${proposal.pricing.total.toLocaleString()}
               </Text>
             </View>
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Deposit (25%):</Text>
+              <Text style={styles.totalLabel}>Required Deposit (25%):</Text>
               <Text style={[styles.totalValue, { color: '#EAB308' }]}>
-                ${proposal.pricing.deposit.toFixed(2)}
+                ${proposal.pricing.deposit.toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Balance Due at Completion:</Text>
+              <Text style={styles.totalValue}>
+                ${(proposal.pricing.total - proposal.pricing.deposit).toLocaleString()}
               </Text>
             </View>
           </View>
@@ -344,22 +357,25 @@ const ProposalPDFDocument: React.FC<ProposalPDFProps> = ({ proposal }) => {
         <View style={styles.terms}>
           <Text style={styles.termsTitle}>Terms & Conditions</Text>
           <Text style={styles.termItem}>
-            • {treeShopConfig.terms.payment.terms[0]}
+            • Payment: {treeShopConfig.terms.payment.terms[0]}
           </Text>
           <Text style={styles.termItem}>
-            • {treeShopConfig.terms.payment.terms[1]}
+            • Balance: {treeShopConfig.terms.payment.terms[1]}
           </Text>
           <Text style={styles.termItem}>
-            • {treeShopConfig.terms.payment.terms[2]}
+            • Late Fees: {treeShopConfig.terms.payment.terms[2]}
           </Text>
           <Text style={styles.termItem}>
-            • {treeShopConfig.terms.environmental.text}
+            • Environmental: {treeShopConfig.terms.environmental.text}
           </Text>
           <Text style={styles.termItem}>
-            • {treeShopConfig.terms.permits.text}
+            • Permits: {treeShopConfig.terms.permits.text}
           </Text>
           <Text style={styles.termItem}>
-            • {treeShopConfig.financing.features[0]} available through {treeShopConfig.financing.provider}
+            • Financing: {treeShopConfig.financing.features[0]} available through {treeShopConfig.financing.provider}
+          </Text>
+          <Text style={styles.termItem}>
+            • This proposal is valid for {treeShopConfig.terms.payment.validityDays} days from the date above.
           </Text>
         </View>
 
@@ -379,9 +395,10 @@ const ProposalPDFDocument: React.FC<ProposalPDFProps> = ({ proposal }) => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>
-          Thank you for choosing Tree Shop! | {treeShopConfig.company.website}
-        </Text>
+        <View style={styles.footer}>
+          <Text>Thank you for choosing Tree Shop! | {treeShopConfig.company.website}</Text>
+          <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} fixed />
+        </View>
       </Page>
     </Document>
   );
