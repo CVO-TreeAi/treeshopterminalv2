@@ -130,6 +130,18 @@ export default function Home() {
               Live
             </span>
             <button 
+              onClick={() => window.location.href = "/leads"}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded"
+            >
+              📊 Lead Center
+            </button>
+            <button 
+              onClick={() => window.location.href = "/proposals"}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+            >
+              📄 Proposals
+            </button>
+            <button 
               onClick={fetchLeads}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
             >
