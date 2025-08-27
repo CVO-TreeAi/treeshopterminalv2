@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Card from "./ui/Card";
+import Button from "./ui/Button";
+import Badge from "./ui/Badge";
+import Input from "./ui/Input";
 
 interface Lead {
   _id: string;
@@ -85,14 +89,14 @@ export default function LeadModal({ lead, onClose, onStatusUpdate }: LeadModalPr
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+      <div className="bg-black border border-gray-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">Lead Details</h2>
+        <div className="border-b border-gray-700 px-6 py-4 flex justify-between items-center bg-gray-900">
+          <h2 className="text-xl font-semibold text-green-500">Lead Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 text-2xl"
+            className="text-gray-400 hover:text-white text-2xl transition-colors"
           >
             ×
           </button>
@@ -101,108 +105,106 @@ export default function LeadModal({ lead, onClose, onStatusUpdate }: LeadModalPr
         {/* Content */}
         <div className="p-6">
           {/* Contact Information */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Contact Information</h3>
+          <Card className="mb-6">
+            <h3 className="text-lg font-medium text-green-500 mb-4">Contact Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600">Name</label>
-                <p className="text-gray-900 font-medium">{lead.name}</p>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Name</label>
+                <p className="text-white font-medium">{lead.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600">Email</label>
-                <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline">
+                <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <a href={`mailto:${lead.email}`} className="text-cyan-400 hover:text-cyan-300">
                   {lead.email}
                 </a>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600">Phone</label>
-                <a href={`tel:${lead.phone}`} className="text-blue-600 hover:underline">
+                <label className="block text-sm font-medium text-gray-400 mb-1">Phone</label>
+                <a href={`tel:${lead.phone}`} className="text-cyan-400 hover:text-cyan-300">
                   {formatPhone(lead.phone)}
                 </a>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600">Source</label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  lead.siteSource === "treeshop.app"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-blue-100 text-blue-800"
-                }`}>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Source</label>
+                <Badge
+                  variant={lead.siteSource === "treeshop.app" ? "success" : "info"}
+                >
                   {lead.siteSource}
-                </span>
+                </Badge>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Property Information */}
           {(lead.address || lead.acreage) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Property Information</h3>
+            <Card className="mb-6">
+              <h3 className="text-lg font-medium text-green-500 mb-4">Property Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {lead.address && (
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-600">Address</label>
-                    <p className="text-gray-900">{lead.address}</p>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Address</label>
+                    <p className="text-white">{lead.address}</p>
                   </div>
                 )}
                 {lead.acreage && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Acreage</label>
-                    <p className="text-gray-900">{lead.acreage} acres</p>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Acreage</label>
+                    <p className="text-white font-medium">{lead.acreage} acres</p>
                   </div>
                 )}
                 {lead.zipCode && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Zip Code</label>
-                    <p className="text-gray-900">{lead.zipCode}</p>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Zip Code</label>
+                    <p className="text-white">{lead.zipCode}</p>
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Service Information */}
           {(lead.selectedPackage || lead.estimatedTotal) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Service Details</h3>
+            <Card className="mb-6">
+              <h3 className="text-lg font-medium text-green-500 mb-4">Service Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {lead.selectedPackage && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Package</label>
-                    <p className="text-gray-900 font-medium">{lead.selectedPackage}</p>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Package</label>
+                    <p className="text-white font-medium">{lead.selectedPackage}</p>
                   </div>
                 )}
                 {lead.estimatedTotal && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Estimated Total</label>
-                    <p className="text-gray-900 font-semibold text-lg">
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Estimated Total</label>
+                    <p className="text-green-500 font-semibold text-2xl">
                       ${lead.estimatedTotal.toLocaleString()}
                     </p>
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Notes */}
           {lead.notes && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Customer Notes</h3>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700">{lead.notes}</p>
+            <Card className="mb-6">
+              <h3 className="text-lg font-medium text-green-500 mb-4">Customer Notes</h3>
+              <div className="bg-gray-900 border border-gray-700 p-4 rounded-lg">
+                <p className="text-gray-300">{lead.notes}</p>
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Status Management */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Lead Status</h3>
+          <Card className="mb-6">
+            <h3 className="text-lg font-medium text-green-500 mb-4">Lead Status</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Current Status</label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Current Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                 >
                   <option value="new">New</option>
                   <option value="contacted">Contacted</option>
@@ -214,67 +216,81 @@ export default function LeadModal({ lead, onClose, onStatusUpdate }: LeadModalPr
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Add Note</label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Add Note</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                   placeholder="Add any notes about this lead..."
                 />
               </div>
               
-              <button
+              <Button
                 onClick={handleStatusChange}
                 disabled={isUpdating}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+                variant="primary"
+                fullWidth
               >
                 {isUpdating ? "Updating..." : "Update Status"}
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
 
           {/* Metadata */}
-          <div className="border-t pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+          <Card className="bg-gray-900 border-gray-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium">Lead ID:</span> {lead._id}
+                <span className="text-gray-400">Lead ID:</span>{" "}
+                <span className="text-gray-300 font-mono">{lead._id}</span>
               </div>
               <div>
-                <span className="font-medium">Lead Score:</span> {lead.leadScore || "N/A"}
+                <span className="text-gray-400">Lead Score:</span>{" "}
+                <Badge
+                  variant={
+                    lead.leadScore === "A" ? "success" :
+                    lead.leadScore === "B" ? "info" :
+                    lead.leadScore === "C" ? "warning" :
+                    "error"
+                  }
+                >
+                  {lead.leadScore || "N/A"}
+                </Badge>
               </div>
               <div>
-                <span className="font-medium">Created:</span> {formatDate(lead.createdAt)}
+                <span className="text-gray-400">Created:</span>{" "}
+                <span className="text-gray-300">{formatDate(lead.createdAt)}</span>
               </div>
               {lead.updatedAt && (
                 <div>
-                  <span className="font-medium">Updated:</span> {formatDate(lead.updatedAt)}
+                  <span className="text-gray-400">Updated:</span>{" "}
+                  <span className="text-gray-300">{formatDate(lead.updatedAt)}</span>
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Footer Actions */}
-        <div className="border-t px-6 py-4 flex justify-end space-x-3">
-          <button
+        <div className="border-t border-gray-700 px-6 py-4 flex justify-end space-x-3 bg-gray-900">
+          <Button
             onClick={() => window.open(`mailto:${lead.email}`)}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+            variant="secondary"
           >
-            Send Email
-          </button>
-          <button
+            📧 Send Email
+          </Button>
+          <Button
             onClick={() => window.open(`tel:${lead.phone}`)}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            variant="primary"
           >
-            Call Now
-          </button>
-          <button
+            📞 Call Now
+          </Button>
+          <Button
             onClick={onClose}
-            className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
+            variant="ghost"
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>
