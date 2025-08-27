@@ -166,7 +166,7 @@ export default function LeadsPage() {
       label: "Score",
       sortable: true,
       width: "80px",
-      render: (lead: Lead & { leadScore?: string; scoreDetails?: any }) => (
+      render: (lead: Lead & { leadScore?: string; scoreDetails?: { recommendations?: string[] } }) => (
         <div className="flex items-center gap-2">
           <span className={`text-lg font-bold ${
             lead.leadScore === "A" ? "text-green-400" :
