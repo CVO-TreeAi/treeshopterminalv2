@@ -202,7 +202,7 @@ export default function LeadStageKPIs({ leads }: LeadStageKPIsProps) {
               <div key={index} className="bg-black p-4 rounded-lg border border-gray-700">
                 <div className="flex justify-between items-start mb-2">
                   <p className="text-xs sm:text-sm text-gray-400">{kpi.label}</p>
-                  {kpi.icon && <span className="text-lg">{kpi.icon}</span>}
+                  {'icon' in kpi && kpi.icon && <span className="text-lg">{kpi.icon}</span>}
                 </div>
                 <p className={`text-2xl sm:text-3xl font-bold ${kpi.color}`}>
                   {kpi.value}
