@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import ProposalModal from "@/components/ProposalModal";
 import ProposalStageKPIs from "@/components/kpi/ProposalStageKPIs";
 
-interface Proposal {
+interface Proposal extends Record<string, unknown> {
   _id: string;
   proposalNumber: string;
   leadId: string;

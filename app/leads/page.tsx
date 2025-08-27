@@ -11,7 +11,7 @@ import LeadModal from "@/components/LeadModal";
 import Button from "@/components/ui/Button";
 import { scoreLeadFromData } from "@/lib/leadScoring";
 
-interface Lead {
+interface Lead extends Record<string, unknown> {
   _id: string;
   name: string;
   email: string;
