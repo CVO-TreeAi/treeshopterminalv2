@@ -231,10 +231,10 @@ export default function ProposalStageKPIs({ proposals }: ProposalStageKPIsProps)
                 <p className={`text-2xl sm:text-3xl font-bold ${kpi.color}`}>
                   {kpi.value}
                 </p>
-                {kpi.percentage && (
+                {'percentage' in kpi && kpi.percentage && (
                   <p className="text-xs text-gray-500 mt-1">{kpi.percentage}</p>
                 )}
-                {kpi.subtext && (
+                {'subtext' in kpi && kpi.subtext && (
                   <p className="text-xs text-gray-500 mt-1">{kpi.subtext}</p>
                 )}
               </div>
