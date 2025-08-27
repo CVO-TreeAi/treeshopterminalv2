@@ -112,7 +112,7 @@ export default function ProposalsPage() {
   const router = useRouter();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [proposals, setProposals] = useState<Proposal[]>(mockProposals);
+  const [proposals] = useState<Proposal[]>(mockProposals);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Check authentication

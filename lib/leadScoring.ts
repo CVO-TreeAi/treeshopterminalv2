@@ -177,7 +177,20 @@ export function calculateLeadScore(factors: LeadScoringFactors): LeadScore {
 }
 
 // Helper function to score a lead from database
-export function scoreLeadFromData(lead: any): LeadScore {
+export function scoreLeadFromData(lead: {
+  email?: string;
+  phone?: string;
+  address?: string;
+  name?: string;
+  acreage?: number;
+  selectedPackage?: string;
+  estimatedTotal?: number;
+  notes?: string;
+  siteSource?: string;
+  createdAt: number;
+  timeOnSite?: number;
+  pagesViewed?: number;
+}): LeadScore {
   const now = Date.now();
   const hoursSinceSubmission = (now - lead.createdAt) / (1000 * 60 * 60);
   
