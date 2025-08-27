@@ -14,7 +14,7 @@ const authOptions: NextAuthOptions = {
       // Only allow office@fltreeshop.com to sign in
       return profile?.email === "office@fltreeshop.com";
     },
-    async session({ session, token }) {
+    async session({ session }) {
       return session;
     },
     async jwt({ token, account }) {
