@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import LeadModal from "@/components/LeadModal";
 import DualPinLogin from "@/components/DualPinLogin";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 
 interface Lead {
   _id: string;
@@ -118,41 +121,41 @@ export default function Home() {
 
   // Show dashboard
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">TreeShop Terminal</h1>
+          <h1 className="text-4xl font-bold text-green-500">TreeShop Terminal</h1>
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-400">
               office@fltreeshop.com
             </div>
-            <span className={`px-3 py-1 rounded ${loading ? "bg-yellow-500" : "bg-green-500"}`}>
-              Live
-            </span>
-            <button 
+            <Badge variant={loading ? "warning" : "success"}>
+              {loading ? "Loading" : "Live"}
+            </Badge>
+            <Button 
               onClick={() => window.location.href = "/leads"}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded"
+              variant="primary"
             >
               📊 Lead Center
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={() => window.location.href = "/proposals"}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+              variant="primary"
             >
               📄 Proposals
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={fetchLeads}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+              variant="secondary"
             >
               Refresh
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleLogout}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded"
+              variant="ghost"
             >
               Sign Out
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -163,23 +166,23 @@ export default function Home() {
         )}
 
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-gray-800 p-4 rounded">
+          <Card padding="sm">
             <h3 className="text-sm text-gray-400 mb-2">Total Leads</h3>
             <p className="text-3xl font-bold">{leads.length}</p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded">
+          </Card>
+          <Card padding="sm">
             <h3 className="text-sm text-gray-400 mb-2">New Leads</h3>
-            <p className="text-3xl font-bold text-blue-400">
+            <p className="text-3xl font-bold text-cyan-400">
               {leads.filter(l => l.status === "new").length}
             </p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded">
+          </Card>
+          <Card padding="sm">
             <h3 className="text-sm text-gray-400 mb-2">Contacted</h3>
-            <p className="text-3xl font-bold text-green-400">
+            <p className="text-3xl font-bold text-green-500">
               {leads.filter(l => l.status === "contacted").length}
             </p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded">
+          </Card>
+          <Card padding="sm">
             <h3 className="text-sm text-gray-400 mb-2">Today</h3>
             <p className="text-3xl font-bold text-yellow-400">
               {leads.filter(l => {
@@ -187,12 +190,12 @@ export default function Home() {
                 return new Date(l.createdAt).setHours(0,0,0,0) === today;
               }).length}
             </p>
-          </div>
+          </Card>
         </div>
 
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
+        <Card padding="none" className="overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-700">
+            <thead className="bg-gray-900 border-b border-gray-700">
               <tr>
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Name</th>
@@ -227,25 +230,31 @@ export default function Home() {
                     {lead.estimatedTotal ? `$${lead.estimatedTotal.toLocaleString()}` : "-"}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      lead.status === "new" ? "bg-blue-500" : 
-                      lead.status === "contacted" ? "bg-yellow-500" :
-                      lead.status === "qualified" ? "bg-purple-500" :
-                      lead.status === "won" ? "bg-green-500" :
-                      lead.status === "lost" ? "bg-red-500" :
-                      "bg-gray-500"
-                    }`}>
+                    <Badge
+                      variant={
+                        lead.status === "new" ? "info" : 
+                        lead.status === "contacted" ? "warning" :
+                        lead.status === "qualified" ? "purple" :
+                        lead.status === "won" ? "success" :
+                        lead.status === "lost" ? "error" :
+                        "default"
+                      }
+                      size="sm"
+                    >
                       {lead.status}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      lead.siteSource === "treeshop.app" ? "bg-green-600" : 
-                      lead.siteSource === "fltreeshop.com" ? "bg-blue-600" : 
-                      "bg-gray-500"
-                    }`}>
+                    <Badge
+                      variant={
+                        lead.siteSource === "treeshop.app" ? "success" : 
+                        lead.siteSource === "fltreeshop.com" ? "info" : 
+                        "default"
+                      }
+                      size="sm"
+                    >
                       {lead.siteSource}
-                    </span>
+                    </Badge>
                   </td>
                 </tr>
               ))}
@@ -258,7 +267,7 @@ export default function Home() {
               )}
             </tbody>
           </table>
-        </div>
+        </Card>
       </div>
 
       {/* Lead Modal */}

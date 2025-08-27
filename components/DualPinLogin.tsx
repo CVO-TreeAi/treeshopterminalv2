@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Card from "./ui/Card";
+import Input from "./ui/Input";
+import Button from "./ui/Button";
 
 interface DualPinLoginProps {
   onSuccess: () => void;
@@ -65,11 +68,26 @@ export default function DualPinLogin({ onSuccess }: DualPinLoginProps) {
 
   const renderPinPad = (side: "left" | "right") => {
     const pin = side === "left" ? leftPin : rightPin;
-    const color = side === "left" ? "blue" : "green";
+    const color = side === "left" ? "cyan" : "green";
+    const colorClasses = {
+      cyan: {
+        text: "text-cyan-400",
+        bg: "bg-cyan-400/10",
+        hover: "hover:bg-cyan-400/20",
+        border: "border-cyan-400/30",
+      },
+      green: {
+        text: "text-green-500",
+        bg: "bg-green-500/10",
+        hover: "hover:bg-green-500/20",
+        border: "border-green-500/30",
+      },
+    };
+    const colors = colorClasses[color];
 
     return (
       <div className="flex flex-col items-center">
-        <h3 className={`text-lg font-medium mb-4 text-${color}-400`}>
+        <h3 className={`text-lg font-medium mb-4 ${colors.text}`}>
           {side === "left" ? "Security Code 1" : "Security Code 2"}
         </h3>
         
@@ -78,8 +96,8 @@ export default function DualPinLogin({ onSuccess }: DualPinLoginProps) {
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className={`w-12 h-12 border-2 border-gray-600 rounded flex items-center justify-center text-2xl ${
-                pin[i] ? `bg-${color}-900/50` : "bg-gray-800"
+              className={`w-12 h-12 border-2 ${colors.border} rounded-lg flex items-center justify-center text-2xl transition-all ${
+                pin[i] ? colors.bg : "bg-gray-900"
               }`}
             >
               {pin[i] ? "•" : ""}
@@ -93,7 +111,7 @@ export default function DualPinLogin({ onSuccess }: DualPinLoginProps) {
             <button
               key={num}
               onClick={() => handleNumberClick(num.toString(), side)}
-              className={`w-16 h-16 bg-gray-700 hover:bg-${color}-800 rounded-lg text-xl font-medium transition-colors`}
+              className={`w-16 h-16 bg-gray-800 ${colors.hover} border border-gray-700 rounded-lg text-xl font-medium transition-all`}
               disabled={pin.length >= 4}
             >
               {num}
@@ -101,20 +119,20 @@ export default function DualPinLogin({ onSuccess }: DualPinLoginProps) {
           ))}
           <button
             onClick={() => handleClear(side)}
-            className="w-16 h-16 bg-red-900 hover:bg-red-800 rounded-lg text-sm font-medium transition-colors"
+            className="w-16 h-16 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-sm font-medium transition-all text-red-400"
           >
             Clear
           </button>
           <button
             onClick={() => handleNumberClick("0", side)}
-            className={`w-16 h-16 bg-gray-700 hover:bg-${color}-800 rounded-lg text-xl font-medium transition-colors`}
+            className={`w-16 h-16 bg-gray-800 ${colors.hover} border border-gray-700 rounded-lg text-xl font-medium transition-all`}
             disabled={pin.length >= 4}
           >
             0
           </button>
           <button
             onClick={() => handleBackspace(side)}
-            className="w-16 h-16 bg-yellow-900 hover:bg-yellow-800 rounded-lg text-sm font-medium transition-colors"
+            className="w-16 h-16 bg-yellow-400/20 hover:bg-yellow-400/30 border border-yellow-400/30 rounded-lg text-sm font-medium transition-all text-yellow-400"
           >
             ←
           </button>
@@ -124,32 +142,31 @@ export default function DualPinLogin({ onSuccess }: DualPinLoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-8">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-8">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">TreeShop Terminal</h1>
+          <h1 className="text-5xl font-bold mb-2 text-green-500">TreeShop Terminal</h1>
           <p className="text-gray-400">Secure Access Portal</p>
         </div>
 
         {/* Email Input */}
-        <div className="bg-gray-800 rounded-lg p-8 mb-8">
+        <Card className="mb-8">
           <div className="max-w-md mx-auto">
-            <label className="block text-sm font-medium mb-2">Email Address</label>
-            <input
+            <Input
               type="email"
+              label="Email Address"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 setError("");
               }}
               placeholder="office@fltreeshop.com"
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
             />
           </div>
-        </div>
+        </Card>
 
         {/* Dual PIN Pads */}
-        <div className="bg-gray-800 rounded-lg p-8">
+        <Card>
           <div className="grid grid-cols-2 gap-12">
             {renderPinPad("left")}
             <div className="border-l border-gray-700"></div>
@@ -158,31 +175,29 @@ export default function DualPinLogin({ onSuccess }: DualPinLoginProps) {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-center">
+            <div className="mt-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-center text-red-400">
               {error}
             </div>
           )}
 
           {/* Login Button */}
           <div className="mt-8 text-center">
-            <button
+            <Button
               onClick={handleLogin}
               disabled={!email || leftPin.length !== 4 || rightPin.length !== 4}
-              className={`px-8 py-4 rounded-lg text-lg font-medium transition-colors ${
-                email && leftPin.length === 4 && rightPin.length === 4
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-gray-700 cursor-not-allowed opacity-50"
-              }`}
+              variant="primary"
+              size="lg"
+              className="min-w-[200px]"
             >
               Access Terminal
-            </button>
+            </Button>
           </div>
 
           {/* Instructions */}
           <div className="mt-8 text-center text-sm text-gray-500">
             Enter email and both security codes to access the terminal
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
