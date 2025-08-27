@@ -49,7 +49,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error("Error fetching leads:", err);
-      setError("Connection error: " + err.message);
+      setError("Connection error: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }

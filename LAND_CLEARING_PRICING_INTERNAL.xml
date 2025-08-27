@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LandClearingPricingFormula>
+  <metadata>
+    <type>INTERNAL_ONLY</type>
+    <confidential>YES</confidential>
+    <timestamp>2025-08-26T22:00:00Z</timestamp>
+  </metadata>
+
+  <service_center>
+    <address>3634 Watermelon Lane, New Smyrna Beach, FL 32168</address>
+    <note>NEVER DISPLAY PUBLICLY - Use "New Smyrna Beach, FL" only</note>
+  </service_center>
+
+  <pricing_structure>
+    <note>INTERNAL USE ONLY - NEVER SHARE WITH CUSTOMERS</note>
+    
+    <base_prices_per_acre>
+      <light_clearing>
+        <name>Light Clearing - Minimal vegetation</name>
+        <description>Sparse trees, light brush, minimal undergrowth</description>
+        <price>12000</price>
+        <debris_yards>20</debris_yards>
+      </light_clearing>
+      
+      <average_clearing>
+        <name>Average Clearing - BASELINE</name>
+        <description>Moderate tree density, standard undergrowth</description>
+        <price>16200</price>
+        <debris_yards>40</debris_yards>
+      </average_clearing>
+      
+      <thick_clearing>
+        <name>Thick Clearing</name>
+        <description>Dense vegetation, significant tree coverage</description>
+        <calculation>Average + 35%</calculation>
+        <price>21870</price>
+        <debris_yards>60</debris_yards>
+      </thick_clearing>
+      
+      <heavy_clearing>
+        <name>Heavy Clearing</name>
+        <description>Very dense forest, maximum difficulty</description>
+        <calculation>Same as Thick (market positioning)</calculation>
+        <price>21870</price>
+        <debris_yards>80</debris_yards>
+      </heavy_clearing>
+      
+      <wet_conditions>
+        <name>Wet Conditions</name>
+        <description>Swampy, marshy, or waterlogged terrain</description>
+        <calculation>Average + 50%</calculation>
+        <price>24300</price>
+        <debris_yards>60</debris_yards>
+        <special_equipment>Required for bog/swamp conditions</special_equipment>
+      </wet_conditions>
+    </base_prices_per_acre>
+
+    <debris_hauling>
+      <base_rate>15</base_rate>
+      <overage_rate>25.75</overage_rate>
+      <unit>per_cubic_yard</unit>
+      <calculation>First X yards at $15, additional at $25.75</calculation>
+      <note>Package includes base yards, overage charged at premium</note>
+      <included_yards_per_package>
+        <light>20 yards/acre included</light>
+        <average>40 yards/acre included</average>
+        <thick>60 yards/acre included</thick>
+        <heavy>80 yards/acre included</heavy>
+        <wet>60 yards/acre included</wet>
+      </included_yards_per_package>
+    </debris_hauling>
+
+    <transport>
+      <rate>350</rate>
+      <unit>per_hour</unit>
+      <calculation>round_trip_from_new_smyrna</calculation>
+      <origin>3634 Watermelon Lane, New Smyrna Beach, FL 32168</origin>
+      <minimum>350</minimum>
+      <note>Minimum 1 hour charge</note>
+    </transport>
+
+    <project_cushion>
+      <percentage>10</percentage>
+      <applies_to>base_plus_debris_plus_transport</applies_to>
+      <reason>Equipment maintenance, unexpected conditions, profit margin</reason>
+    </project_cushion>
+  </pricing_structure>
+
+  <calculation_code>
+    <code><![CDATA[
+// INTERNAL CALCULATION - DO NOT EXPOSE
+const calculateLandClearingPrice = async (formData) => {
+  const { acreage, packageType, address, includeDebrisHaul } = formData;
+  
+  // Service center (NEVER EXPOSE FULL ADDRESS)
+  const SERVICE_CENTER = {
+    lat: 29.0258,  // New Smyrna Beach
+    lng: -80.9270,
+    address: "New Smyrna Beach, FL" // Use city only publicly
+  };
+  
+  // Internal pricing structure
+  const AVERAGE_BASE = 16200;
+  
+  const packages = {
+    'Light Clearing': {
+      price: 12000,
+      debrisYards: 20
+    },
+    'Average Clearing': {
+      price: AVERAGE_BASE,
+      debrisYards: 40
+    },
+    'Thick Clearing': {
+      price: AVERAGE_BASE * 1.35, // 21870
+      debrisYards: 60
+    },
+    'Heavy Clearing': {
+      price: AVERAGE_BASE * 1.35, // 21870 (same as thick)
+      debrisYards: 80
+    },
+    'Wet Conditions': {
+      price: AVERAGE_BASE * 1.50, // 24300
+      debrisYards: 60
+    }
+  };
+  
+  const selectedPackage = packages[packageType] || packages['Average Clearing'];
+  const baseTotal = selectedPackage.price * acreage;
+  
+  // Debris hauling calculation with overage pricing
+  let debrisCost = 0;
+  if (includeDebrisHaul) {
+    const includedYards = selectedPackage.debrisYards * acreage;
+    const actualDebrisYards = includedYards; // Base package includes these yards
+    
+    // First yards at $15, any additional at $25.75
+    if (actualDebrisYards <= includedYards) {
+      debrisCost = actualDebrisYards * 15;
+    } else {
+      const overageYards = actualDebrisYards - includedYards;
+      debrisCost = (includedYards * 15) + (overageYards * 25.75);
+    }
+  }
+  
+  // Calculate transport from New Smyrna Beach
+  let transportCost = 350; // Minimum 1 hour
+  
+  if (address && typeof google !== 'undefined') {
+    try {
+      const service = new google.maps.DistanceMatrixService();
+      const result = await new Promise((resolve, reject) => {
+        service.getDistanceMatrix({
+          origins: [SERVICE_CENTER.address],
+          destinations: [address],
+          travelMode: 'DRIVING',
+          unitSystem: google.maps.UnitSystem.IMPERIAL,
+        }, (response, status) => {
+          if (status === 'OK') resolve(response);
+          else reject(status);
+        });
+      });
+      
+      if (result.rows[0].elements[0].status === 'OK') {
+        const durationOneWay = result.rows[0].elements[0].duration.value / 3600;
+        const roundTripHours = durationOneWay * 2;
+        transportCost = Math.max(350, Math.round(roundTripHours * 350));
+      }
+    } catch (error) {
+      console.error('Transport calculation failed, using minimum');
+      transportCost = 350;
+    }
+  }
+  
+  // Calculate final total with cushion
+  const subtotal = baseTotal + debrisCost + transportCost;
+  const cushion = subtotal * 0.10;
+  const total = subtotal + cushion;
+  
+  // ONLY RETURN FINAL TOTAL - NO BREAKDOWN
+  return {
+    total: Math.round(total),
+    // Internal use only - never expose to customer
+    _internal: {
+      baseTotal,
+      debrisCost,
+      transportCost,
+      cushion,
+      debrisYards: selectedPackage.debrisYards * acreage
+    }
+  };
+};
+    ]]></code>
+  </calculation_code>
+
+  <package_descriptions>
+    <light_clearing>
+      <customer_description>Ideal for properties with sparse vegetation</customer_description>
+      <internal_criteria>
+        - Less than 25% tree coverage
+        - Minimal underbrush
+        - Easy equipment access
+        - No major obstacles
+      </internal_criteria>
+    </light_clearing>
+    
+    <average_clearing>
+      <customer_description>Standard land clearing for most properties</customer_description>
+      <internal_criteria>
+        - 25-50% tree coverage
+        - Moderate underbrush
+        - Standard difficulty
+        - Typical Florida vegetation
+      </internal_criteria>
+    </average_clearing>
+    
+    <thick_clearing>
+      <customer_description>For heavily vegetated properties</customer_description>
+      <internal_criteria>
+        - 50-75% tree coverage
+        - Dense underbrush
+        - Difficult access areas
+        - Requires extra time/equipment
+      </internal_criteria>
+    </thick_clearing>
+    
+    <heavy_clearing>
+      <customer_description>Maximum density clearing</customer_description>
+      <internal_criteria>
+        - 75-100% tree coverage
+        - Extremely dense vegetation
+        - Most difficult conditions
+        - Priced same as thick for market reasons
+      </internal_criteria>
+    </heavy_clearing>
+    
+    <wet_conditions>
+      <customer_description>Specialized clearing for wetlands</customer_description>
+      <internal_criteria>
+        - Any coverage level with water
+        - Swamp, marsh, bog conditions
+        - Requires specialized equipment
+        - Higher operational costs
+      </internal_criteria>
+    </wet_conditions>
+  </package_descriptions>
+
+  <debris_volume_calculations>
+    <note>Package includes base debris yards - overage charged at premium</note>
+    <pricing_structure>
+      <included>Each package includes X yards/acre at $15/yard</included>
+      <overage>Additional yards beyond package limit at $25.75/yard</overage>
+    </pricing_structure>
+    <package_limits>
+      <light>20 yards/acre included (minimal debris)</light>
+      <average>40 yards/acre included (standard load)</average>
+      <thick>60 yards/acre included (heavy load)</thick>
+      <heavy>80 yards/acre included (maximum load)</heavy>
+      <wet>60 yards/acre included (difficult conditions)</wet>
+    </package_limits>
+    <overage_example>
+      If Heavy Clearing produces 100 yards/acre:
+      - First 80 yards: $15/yard = $1,200
+      - Extra 20 yards: $25.75/yard = $515
+      - Total debris cost per acre: $1,715
+    </overage_example>
+  </debris_volume_calculations>
+
+  <customer_facing>
+    <what_customers_see>
+      - Package selection dropdown
+      - Acreage input
+      - Optional debris hauling checkbox
+      - ONLY THE FINAL TOTAL PRICE
+    </what_customers_see>
+    <what_we_collect>
+      <field>Name</field>
+      <field>Email</field>
+      <field>Phone</field>
+      <field>Property Address</field>
+      <field>Acreage</field>
+      <field>Package Type</field>
+      <field>Debris Hauling (Yes/No)</field>
+      <field>Additional Details (optional)</field>
+    </what_we_collect>
+    <what_we_never_show>
+      - Base price per acre
+      - Debris cost breakdown
+      - Transport cost details
+      - Service center address
+      - Cushion percentage
+      - Any cost components
+    </what_we_never_show>
+  </customer_facing>
+
+  <competitive_positioning>
+    <note>Pricing strategy vs competitors</note>
+    <our_advantage>
+      - All-inclusive pricing (no hidden fees)
+      - Professional equipment included
+      - Insurance and licensing included
+      - 10% cushion ensures profitability
+    </our_advantage>
+    <market_position>
+      - Premium service provider
+      - Not the cheapest option
+      - Focus on quality and reliability
+      - Justify price with equipment/expertise
+    </market_position>
+  </competitive_positioning>
+
+  <security_notes>
+    <critical>
+      - NEVER expose New Smyrna Beach full address
+      - NEVER show component pricing to customers
+      - NEVER reveal debris yard calculations
+      - NEVER display transport cost separately
+      - NEVER mention the 10% cushion
+      - ONLY show final calculated total
+    </critical>
+    <acceptable_to_share>
+      - Package descriptions
+      - Service areas (general)
+      - Timeline estimates
+      - Equipment capabilities
+      - Insurance/licensing info
+    </acceptable_to_share>
+  </security_notes>
+
+  <special_conditions>
+    <permits>
+      <note>Customer responsibility but we can advise</note>
+      <typical>Land clearing permits may be required</typical>
+    </permits>
+    <environmental>
+      <protected_trees>Cannot clear without special permit</protected_trees>
+      <wetlands>May require environmental assessment</wetlands>
+      <endangered_species>Work stops if found</endangered_species>
+    </environmental>
+    <additional_charges_not_in_calculator>
+      <stump_grinding>Quoted separately if needed</stump_grinding>
+      <root_raking>Additional service if requested</root_raking>
+      <grading>Separate service after clearing</grading>
+      <seeding>Follow-up service option</seeding>
+    </additional_charges_not_in_calculator>
+  </special_conditions>
+
+  <implementation_notes>
+    <calculator_location>/src/components/LandClearingCalculator.tsx</calculator_location>
+    <lines>10-51 (packages), 203-212 (formula)</lines>
+    <critical_functions>
+      - calculatePrice() - Main calculation
+      - Distance Matrix API - Transport costs
+      - Package selection - Determines base rate
+    </critical_functions>
+  </implementation_notes>
+</LandClearingPricingFormula>
