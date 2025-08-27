@@ -92,22 +92,91 @@ export default function NewProposalPage() {
 
   const fetchLeadData = async (id: string) => {
     try {
-      // In production, fetch from Convex
-      // For now, mock the data
-      setProposal((prev) => ({
-        ...prev,
-        customerName: "John Doe",
-        customerEmail: "john@example.com",
-        customerPhone: "555-0123",
-        propertyAddress: "123 Oak Street",
-        acreage: 2.5,
-        stageHistory: [
-          { stage: "lead_created", timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000 },
-          { stage: "lead_contacted", timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000 },
-          { stage: "lead_qualified", timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 },
-          { stage: "proposal_created", timestamp: Date.now(), notes: "Converted from lead" },
-        ],
-      }));
+      // Fetch the actual lead data from Convex
+      const response = await fetch(
+        "https://earnest-lemming-634.convex.cloud/api/query",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "terminalSync:syncLeadsToTerminal",
+            args: {},
+          }),
+        }
+      );
+
+      const data = await response.json();
+      
+      if (data.status === "success" && data.value) {
+        const leads = data.value.completedLeads || [];
+        const lead = leads.find((l: any) => l._id === id);
+        
+        if (lead) {
+          // Pre-fill ALL available lead information
+          const services: ServiceLine[] = [];
+          
+          // If lead has a selected package, create a service line for it
+          if (lead.selectedPackage) {
+            services.push({
+              service: lead.selectedPackage,
+              description: `${lead.selectedPackage} - Complete service package`,
+              quantity: lead.acreage || 1,
+              unit: "acres",
+              unitPrice: lead.estimatedTotal ? lead.estimatedTotal / (lead.acreage || 1) : 0,
+              total: lead.estimatedTotal || 0,
+            });
+          }
+          
+          // Calculate initial totals
+          const subtotal = services.reduce((sum, line) => sum + line.total, 0);
+          const taxRate = 0.08; // 8% default
+          const tax = subtotal * taxRate;
+          const total = subtotal + tax;
+          
+          setProposal((prev) => ({
+            ...prev,
+            customerName: lead.name || "",
+            customerEmail: lead.email || "",
+            customerPhone: lead.phone || "",
+            propertyAddress: lead.address || "",
+            zipCode: lead.zipCode || "",
+            acreage: lead.acreage || 0,
+            services,
+            subtotal,
+            tax,
+            total,
+            notes: lead.notes || "",
+            leadId: id,
+            stageHistory: [
+              { 
+                stage: "lead_created", 
+                timestamp: lead.createdAt,
+                notes: `Source: ${lead.siteSource}`
+              },
+              ...(lead.status === "contacted" || lead.status === "qualified" ? [{ 
+                stage: "lead_contacted", 
+                timestamp: lead.updatedAt || lead.createdAt + 24 * 60 * 60 * 1000,
+                notes: "Customer contacted"
+              }] : []),
+              ...(lead.status === "qualified" ? [{ 
+                stage: "lead_qualified", 
+                timestamp: lead.updatedAt || lead.createdAt + 2 * 24 * 60 * 60 * 1000,
+                notes: lead.leadScore ? `Lead Score: ${lead.leadScore}` : "Lead qualified"
+              }] : []),
+              { 
+                stage: "proposal_created", 
+                timestamp: Date.now(), 
+                notes: "Converted from lead to proposal" 
+              },
+            ],
+          }));
+          
+          // If we have services pre-filled, jump to step 2
+          if (services.length > 0) {
+            setCurrentStep(2);
+          }
+        }
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error loading lead:", error);
@@ -259,29 +328,49 @@ export default function NewProposalPage() {
       {/* Stage History (if from lead) */}
       {leadId && (
         <Card className="mb-6 bg-gray-900">
-          <h3 className="text-lg font-medium text-green-500 mb-4">Conversion History</h3>
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-lg font-medium text-green-500">Lead Conversion History</h3>
+            <Badge variant="success">Auto-filled from Lead</Badge>
+          </div>
           <div className="space-y-2">
             {proposal.stageHistory.map((stage, index) => (
               <div key={index} className="flex items-center gap-4 text-sm">
                 <span className="text-gray-500">
                   {new Date(stage.timestamp).toLocaleDateString()}
                 </span>
-                <Badge variant="success" size="sm">
+                <Badge 
+                  variant={stage.stage.includes("proposal") ? "warning" : "info"} 
+                  size="sm"
+                >
                   {stage.stage.replace(/_/g, " ").toUpperCase()}
                 </Badge>
                 {stage.notes && (
-                  <span className="text-gray-400">{stage.notes}</span>
+                  <span className="text-gray-400 italic">{stage.notes}</span>
                 )}
               </div>
             ))}
           </div>
+          {proposal.services.length > 0 && (
+            <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <p className="text-sm text-green-400">
+                ✓ Pre-filled {proposal.services.length} service{proposal.services.length > 1 ? 's' : ''} totaling ${proposal.subtotal.toLocaleString()} from lead data
+              </p>
+            </div>
+          )}
         </Card>
       )}
 
       {/* Step 1: Customer Info */}
       {currentStep === 1 && (
         <Card>
-          <h2 className="text-xl font-semibold text-green-500 mb-6">Customer Information</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-green-500">Customer Information</h2>
+            {leadId && proposal.customerName && (
+              <span className="text-sm text-gray-400">
+                Fields marked with ✓ were auto-filled from lead
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Customer Name"
