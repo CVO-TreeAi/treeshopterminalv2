@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Input from "@/components/ui/Input";
 
-interface Invoice {
+interface Invoice extends Record<string, unknown> {
   _id: string;
   invoiceNumber: string;
   workOrderId?: string;
@@ -136,12 +136,12 @@ export default function InvoicesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "draft": return "secondary";
+      case "draft": return "default";
       case "sent": return "info";
       case "paid": return "success";
       case "overdue": return "error";
-      case "cancelled": return "secondary";
-      default: return "secondary";
+      case "cancelled": return "default";
+      default: return "default";
     }
   };
 

@@ -10,7 +10,7 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 
-interface Customer {
+interface Customer extends Record<string, unknown> {
   _id: string;
   name: string;
   email: string;
@@ -244,7 +244,7 @@ export default function CustomersPage() {
         <Badge 
           variant={
             customer.status === "active" ? "success" :
-            customer.status === "inactive" ? "secondary" : "warning"
+            customer.status === "inactive" ? "default" : "warning"
           }
         >
           {customer.status}

@@ -202,8 +202,6 @@ interface ProposalPDFProps {
       total: number;
     }[];
     pricing: {
-      subtotal: number;
-      tax: number;
       total: number;
       deposit: number;
     };
@@ -319,14 +317,6 @@ const ProposalPDFDocument: React.FC<ProposalPDFProps> = ({ proposal }) => {
 
           {/* Totals */}
           <View style={styles.totalsSection}>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Subtotal:</Text>
-              <Text style={styles.totalValue}>${proposal.pricing.subtotal.toLocaleString()}</Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Tax (8%):</Text>
-              <Text style={styles.totalValue}>${proposal.pricing.tax.toFixed(2)}</Text>
-            </View>
             <View style={[styles.totalRow, styles.grandTotal]}>
               <Text style={[styles.totalLabel, styles.grandTotal]}>Total:</Text>
               <Text style={[styles.totalValue, styles.grandTotal]}>

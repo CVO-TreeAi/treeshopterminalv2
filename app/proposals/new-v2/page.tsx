@@ -479,8 +479,6 @@ function ProposalForm() {
         total: item.total,
       })),
                     pricing: {
-                      subtotal: proposal.pricingResult.subtotal,
-                      tax: proposal.pricingResult.tax,
                       total: proposal.pricingResult.total,
                       deposit: proposal.pricingResult.deposit,
                     },
@@ -526,8 +524,6 @@ function ProposalForm() {
         total: item.total,
       })),
                         pricing: {
-                          subtotal: proposal.pricingResult.subtotal,
-                          tax: proposal.pricingResult.tax,
                           total: proposal.pricingResult.total,
                           deposit: proposal.pricingResult.deposit,
                         },

@@ -35,8 +35,6 @@ interface Proposal extends Record<string, unknown> {
     unitPrice: number;
     total: number;
   }[];
-  subtotal: number;
-  tax: number;
   total: number;
   status: "draft" | "sent" | "viewed" | "approved" | "rejected" | "expired";
   validUntil: number;
@@ -123,15 +121,11 @@ export default function ProposalModal({ proposal, onClose, onStatusUpdate, onEdi
       updatedServices[index].total = updatedServices[index].quantity * updatedServices[index].unitPrice;
     }
     
-    const subtotal = updatedServices.reduce((sum, s) => sum + s.total, 0);
-    const tax = subtotal * 0.08;
-    const total = subtotal + tax;
+    const total = updatedServices.reduce((sum, s) => sum + s.total, 0);
     
     setEditedProposal(prev => ({
       ...prev,
       services: updatedServices,
-      subtotal,
-      tax,
       total,
     }));
   };
@@ -157,8 +151,6 @@ export default function ProposalModal({ proposal, onClose, onStatusUpdate, onEdi
     },
     services: editedProposal.services,
     pricing: {
-      subtotal: editedProposal.subtotal,
-      tax: editedProposal.tax,
       total: editedProposal.total,
       deposit: editedProposal.total * 0.25,
     },
@@ -299,14 +291,6 @@ export default function ProposalModal({ proposal, onClose, onStatusUpdate, onEdi
             
             {/* Totals */}
             <div className="mt-6 pt-4 border-t border-gray-700 space-y-2">
-              <div className="flex justify-between">
-                <p>Subtotal</p>
-                <p className="font-medium">${editedProposal.subtotal.toLocaleString()}</p>
-              </div>
-              <div className="flex justify-between">
-                <p>Tax (8%)</p>
-                <p className="font-medium">${editedProposal.tax.toFixed(2)}</p>
-              </div>
               <div className="flex justify-between text-lg font-bold">
                 <p>Total</p>
                 <p className="text-green-400">${editedProposal.total.toFixed(2)}</p>

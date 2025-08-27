@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Input from "@/components/ui/Input";
 
-interface WorkOrder {
+interface WorkOrder extends Record<string, unknown> {
   _id: string;
   workOrderNumber: string;
   proposalId?: string;
@@ -149,8 +149,8 @@ export default function WorkOrdersPage() {
       case "in-progress": return "info";
       case "completed": return "success";
       case "cancelled": return "error";
-      case "on-hold": return "secondary";
-      default: return "secondary";
+      case "on-hold": return "default";
+      default: return "default";
     }
   };
 
