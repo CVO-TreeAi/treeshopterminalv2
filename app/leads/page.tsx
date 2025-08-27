@@ -256,10 +256,9 @@ export default function LeadsPage() {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            // Convert to proposal logic here
-            console.log("Convert to proposal:", lead._id);
+            window.location.href = `/proposals/new?leadId=${lead._id}`;
           }}
-          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+          className="px-3 py-1 bg-green-500 hover:bg-green-400 rounded text-xs text-black font-medium"
         >
           Create Proposal
         </button>
