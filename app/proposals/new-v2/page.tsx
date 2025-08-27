@@ -172,7 +172,14 @@ export default function NewProposalV2Page() {
         address: proposal.propertyAddress,
         acreage: proposal.acreage,
       },
-      services: proposal.pricingResult.breakdown,
+      services: proposal.pricingResult.breakdown.map((item: any) => ({
+        service: item.item || item.service,
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        unitPrice: item.unitPrice,
+        total: item.total,
+      })),
       pricing: {
         subtotal: proposal.pricingResult.subtotal,
         tax: proposal.pricingResult.tax,
@@ -463,7 +470,14 @@ export default function NewProposalV2Page() {
                       address: proposal.propertyAddress,
                       acreage: proposal.acreage,
                     },
-                    services: proposal.pricingResult.breakdown,
+                    services: proposal.pricingResult.breakdown.map((item: any) => ({
+        service: item.item || item.service,
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        unitPrice: item.unitPrice,
+        total: item.total,
+      })),
                     pricing: {
                       subtotal: proposal.pricingResult.subtotal,
                       tax: proposal.pricingResult.tax,
@@ -503,7 +517,14 @@ export default function NewProposalV2Page() {
                           address: proposal.propertyAddress,
                           acreage: proposal.acreage,
                         },
-                        services: proposal.pricingResult.breakdown,
+                        services: proposal.pricingResult.breakdown.map((item: any) => ({
+        service: item.item || item.service,
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        unitPrice: item.unitPrice,
+        total: item.total,
+      })),
                         pricing: {
                           subtotal: proposal.pricingResult.subtotal,
                           tax: proposal.pricingResult.tax,
