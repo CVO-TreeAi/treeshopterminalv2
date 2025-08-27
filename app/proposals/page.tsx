@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import DataTable, { Column } from "@/components/shared/DataTable";
+import Button from "@/components/ui/Button";
+import ProposalModal from "@/components/ProposalModal";
+import ProposalStageKPIs from "@/components/kpi/ProposalStageKPIs";
 
 interface Proposal {
   _id: string;
@@ -112,8 +116,10 @@ export default function ProposalsPage() {
   const router = useRouter();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [proposals] = useState<Proposal[]>(mockProposals);
+  const [proposals, setProposals] = useState<Proposal[]>(mockProposals);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
+  const [view, setView] = useState<"table" | "kpi">("table");
 
   // Check authentication
   useEffect(() => {
@@ -319,58 +325,83 @@ export default function ProposalsPage() {
   }
 
   return (
-    <DirectoryLayout
-      title="Proposal Management"
-      subtitle="Track and manage your TreeShop proposals"
-      stats={stats}
-      actions={
-        <>
-          <button
-            onClick={() => router.push("/proposals/new")}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
-          >
-            + New Proposal
-          </button>
-          <button
-            onClick={() => router.push("/leads")}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
-          >
-            Leads
-          </button>
-          <button
-            onClick={() => router.push("/")}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded"
-          >
-            Dashboard
-          </button>
-        </>
-      }
-    >
-      <DataTable
-        data={filteredProposals}
-        columns={columns}
-        onRowClick={(proposal) => {
-          console.log("Open proposal:", proposal._id);
-          // Will open proposal detail modal
-        }}
-        searchKeys={["customerName", "customerEmail", "proposalNumber"]}
-        filters={
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
-          >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="sent">Sent</option>
-            <option value="viewed">Viewed</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="expired">Expired</option>
-          </select>
+    <AuthenticatedLayout>
+      <DirectoryLayout
+        title="Proposal Management"
+        subtitle="Track and manage your TreeShop proposals"
+        stats={stats}
+        actions={
+          <>
+            <Button
+              onClick={() => setView(view === "table" ? "kpi" : "table")}
+              variant="secondary"
+              size="sm"
+            >
+              {view === "table" ? "📊 View KPIs" : "📋 View Table"}
+            </Button>
+            <Button
+              onClick={() => router.push("/proposals/new-v2")}
+              variant="primary"
+              size="sm"
+            >
+              + New Proposal
+            </Button>
+          </>
         }
-        emptyMessage="No proposals yet. Create your first proposal from a qualified lead."
-      />
-    </DirectoryLayout>
+      >
+      {view === "kpi" ? (
+        <ProposalStageKPIs proposals={proposals} />
+      ) : (
+        <DataTable
+          data={filteredProposals}
+          columns={columns}
+          onRowClick={(proposal) => setSelectedProposal(proposal)}
+          searchKeys={["customerName", "customerEmail", "proposalNumber"]}
+          filters={
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+            >
+              <option value="all">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="viewed">Viewed</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="expired">Expired</option>
+            </select>
+          }
+          emptyMessage="No proposals yet. Create your first proposal from a qualified lead."
+        />
+      )}
+      
+      {/* Proposal Modal */}
+      {selectedProposal && (
+        <ProposalModal
+          proposal={selectedProposal}
+          onClose={() => setSelectedProposal(null)}
+          onStatusUpdate={(proposalId, newStatus) => {
+            setProposals(prev =>
+              prev.map(p =>
+                p._id === proposalId ? { ...p, status: newStatus as any } : p
+              )
+            );
+            setSelectedProposal(prev =>
+              prev && prev._id === proposalId ? { ...prev, status: newStatus as any } : prev
+            );
+          }}
+          onEdit={(updatedProposal) => {
+            setProposals(prev =>
+              prev.map(p =>
+                p._id === updatedProposal._id ? updatedProposal : p
+              )
+            );
+            setSelectedProposal(updatedProposal);
+          }}
+        />
+      )}
+      </DirectoryLayout>
+    </AuthenticatedLayout>
   );
 }

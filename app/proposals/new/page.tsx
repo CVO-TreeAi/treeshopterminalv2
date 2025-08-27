@@ -2,11 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
+import PricingCalculator, { PricingResult } from "@/components/pricing/PricingCalculator";
+import { treeShopConfig, formatProposalNumber } from "@/lib/treeShopConfig";
+import { pdf } from "@react-pdf/renderer";
+import ProposalPDFDocument from "@/components/proposals/ProposalPDF";
+
+// Dynamic import for PDF viewer to avoid SSR issues
+const ProposalPDFViewer = dynamic(
+  () => import("@/components/proposals/ProposalPDF").then(mod => mod.ProposalPDFViewer),
+  { ssr: false }
+);
 
 interface ServiceLine {
   service: string;
@@ -27,6 +39,7 @@ interface ProposalForm {
   
   // Property Details
   acreage: number;
+  serviceType?: "forestry-mulching" | "land-clearing" | null;
   
   // Services
   services: ServiceLine[];
@@ -65,6 +78,7 @@ export default function NewProposalPage() {
     propertyAddress: "",
     zipCode: "",
     acreage: 0,
+    serviceType: null,
     services: [],
     subtotal: 0,
     taxRate: 0.08, // 8% default
@@ -82,6 +96,9 @@ export default function NewProposalPage() {
       },
     ],
   });
+  
+  const [showPDFPreview, setShowPDFPreview] = useState(false);
+  const [pricingResult, setPricingResult] = useState<PricingResult | null>(null);
 
   // Load lead data if converting
   useEffect(() => {
@@ -277,28 +294,31 @@ export default function NewProposalPage() {
 
   if (loading) {
     return (
-      <DirectoryLayout title="Loading..." subtitle="Fetching lead data...">
-        <Card>
-          <div className="text-center py-12">
-            <div className="text-gray-400">Loading lead information...</div>
-          </div>
-        </Card>
-      </DirectoryLayout>
+      <AuthenticatedLayout>
+        <DirectoryLayout title="Loading..." subtitle="Fetching lead data...">
+          <Card>
+            <div className="text-center py-12">
+              <div className="text-gray-400">Loading lead information...</div>
+            </div>
+          </Card>
+        </DirectoryLayout>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <DirectoryLayout
-      title="Create Proposal"
-      subtitle={leadId ? `Converting lead to proposal` : "New proposal from scratch"}
-      actions={
-        <>
-          <Button variant="ghost" onClick={() => router.push("/proposals")}>
-            Cancel
-          </Button>
-        </>
-      }
-    >
+    <AuthenticatedLayout>
+      <DirectoryLayout
+        title="Create Proposal"
+        subtitle={leadId ? `Converting lead to proposal` : "New proposal from scratch"}
+        actions={
+          <>
+            <Button variant="ghost" onClick={() => router.push("/proposals")}>
+              Cancel
+            </Button>
+          </>
+        }
+      >
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex justify-between">
@@ -598,6 +618,7 @@ export default function NewProposalPage() {
           </div>
         </Card>
       )}
-    </DirectoryLayout>
+      </DirectoryLayout>
+    </AuthenticatedLayout>
   );
 }

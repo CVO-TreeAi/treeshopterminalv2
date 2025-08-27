@@ -226,14 +226,28 @@ export default function LeadModal({ lead, onClose, onStatusUpdate }: LeadModalPr
                 />
               </div>
               
-              <Button
-                onClick={handleStatusChange}
-                disabled={isUpdating}
-                variant="primary"
-                fullWidth
-              >
-                {isUpdating ? "Updating..." : "Update Status"}
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleStatusChange}
+                  disabled={isUpdating}
+                  variant="secondary"
+                  size="sm"
+                  className="flex-1"
+                >
+                  {isUpdating ? "Updating..." : "Update Status"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Navigate to proposal creation with lead data
+                    window.location.href = `/proposals/new-v2?leadId=${lead._id}`;
+                  }}
+                  variant="primary"
+                  size="sm"
+                  className="flex-1"
+                >
+                  🚀 Upgrade to Proposal
+                </Button>
+              </div>
             </div>
           </Card>
 

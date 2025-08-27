@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import DataTable, { Column } from "@/components/shared/DataTable";
 import LeadKPIDashboard from "@/components/kpi/LeadKPIDashboard";
+import LeadStageKPIs from "@/components/kpi/LeadStageKPIs";
 import LeadModal from "@/components/LeadModal";
+import Button from "@/components/ui/Button";
 import { scoreLeadFromData } from "@/lib/leadScoring";
 
 interface Lead {
@@ -256,7 +259,7 @@ export default function LeadsPage() {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            window.location.href = `/proposals/new?leadId=${lead._id}`;
+            window.location.href = `/proposals/new-v2?leadId=${lead._id}`;
           }}
           className="px-3 py-1 bg-green-500 hover:bg-green-400 rounded text-xs text-black font-medium"
         >
@@ -279,35 +282,37 @@ export default function LeadsPage() {
   }
 
   return (
-    <DirectoryLayout
-      title="Lead Management"
-      subtitle="Track and convert your TreeShop leads"
-      stats={stats}
-      actions={
-        <>
-          <button
-            onClick={() => setView(view === "table" ? "kpi" : "table")}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
-          >
-            {view === "table" ? "📊 KPIs" : "📋 Table"}
-          </button>
-          <button
-            onClick={fetchLeads}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
-          >
-            Refresh
-          </button>
-          <button
-            onClick={() => router.push("/")}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded"
-          >
-            Dashboard
-          </button>
-        </>
-      }
-    >
+    <AuthenticatedLayout>
+      <DirectoryLayout
+        title="Lead Management"
+        subtitle="Track and convert your TreeShop leads"
+        stats={stats}
+        actions={
+          <>
+            <Button
+              onClick={() => setView(view === "table" ? "kpi" : "table")}
+              variant="secondary"
+              size="sm"
+            >
+              {view === "table" ? "📊 View KPIs" : "📋 View Table"}
+            </Button>
+            <Button
+              onClick={fetchLeads}
+              variant="secondary"
+              size="sm"
+            >
+              ↻ Refresh
+            </Button>
+          </>
+        }
+      >
       {view === "kpi" ? (
-        <LeadKPIDashboard leads={leads} />
+        <>
+          <LeadStageKPIs leads={leads} />
+          <div className="mt-8">
+            <LeadKPIDashboard leads={leads} />
+          </div>
+        </>
       ) : (
         <DataTable
           data={filteredLeads}
@@ -339,6 +344,7 @@ export default function LeadsPage() {
           onStatusUpdate={handleStatusUpdate}
         />
       )}
-    </DirectoryLayout>
+      </DirectoryLayout>
+    </AuthenticatedLayout>
   );
 }

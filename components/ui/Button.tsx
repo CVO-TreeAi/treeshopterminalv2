@@ -18,7 +18,7 @@ export default function Button({
   disabled = false,
   ...props
 }: ButtonProps) {
-  const baseClasses = "font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
+  const baseClasses = "font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black active:scale-[0.98]";
   
   const variantClasses = {
     primary: "bg-green-500 hover:bg-green-400 active:bg-green-600 text-black focus:ring-green-500",
@@ -29,9 +29,9 @@ export default function Button({
   };
   
   const sizeClasses = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
+    sm: "px-2 sm:px-3 py-1.5 text-xs sm:text-sm",
+    md: "px-3 sm:px-4 py-2 text-sm sm:text-base",
+    lg: "px-4 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg",
   };
   
   const widthClass = fullWidth ? "w-full" : "";

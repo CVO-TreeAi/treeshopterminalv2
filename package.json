@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.0",
     "convex": "^1.26.1",
     "next": "15.5.1",
     "react": "19.1.0",

@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import LeadModal from "@/components/LeadModal";
 import DualPinLogin from "@/components/DualPinLogin";
+import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
+import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
 
 interface Lead {
   _id: string;
@@ -27,10 +27,19 @@ interface Lead {
   obstacles?: string[];
 }
 
+interface Proposal {
+  _id: string;
+  proposalNumber: string;
+  status: "draft" | "sent" | "viewed" | "approved" | "rejected" | "expired";
+  total: number;
+  createdAt: number;
+}
+
 export default function Home() {
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [error, setError] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
@@ -54,6 +63,24 @@ export default function Home() {
     }
     setLoading(false);
   }, []);
+
+  // Mock proposals data - will be replaced with Convex sync
+  const mockProposals: Proposal[] = [
+    {
+      _id: "1",
+      proposalNumber: "PROP-2025-001",
+      status: "sent",
+      total: 8100,
+      createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
+    },
+    {
+      _id: "2",
+      proposalNumber: "PROP-2025-002",
+      status: "viewed",
+      total: 29111.4,
+      createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
+    },
+  ];
 
   const fetchLeads = async () => {
     try {
@@ -91,6 +118,7 @@ export default function Home() {
   useEffect(() => {
     if (authenticated) {
       fetchLeads();
+      setProposals(mockProposals); // Set mock proposals
       const interval = setInterval(fetchLeads, 10000); // Refresh every 10 seconds
       return () => clearInterval(interval);
     }
@@ -108,176 +136,50 @@ export default function Home() {
     );
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("authenticated");
-    localStorage.removeItem("authTime");
-    setAuthenticated(false);
-  };
-
   // Show login if not authenticated
   if (!authenticated) {
     return <DualPinLogin onSuccess={() => setAuthenticated(true)} />;
   }
 
-  // Show dashboard
+  // Show dashboard with sidebar
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-green-500">TreeShop Terminal</h1>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-400">
-              office@fltreeshop.com
+    <AuthenticatedLayout>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-500">Dashboard</h1>
+              <p className="text-gray-400 mt-2">Business Operations & KPIs</p>
             </div>
-            <Badge variant={loading ? "warning" : "success"}>
-              {loading ? "Loading" : "Live"}
-            </Badge>
-            <Button 
-              onClick={() => window.location.href = "/leads"}
-              variant="primary"
-            >
-              📊 Lead Center
-            </Button>
-            <Button 
-              onClick={() => window.location.href = "/proposals"}
-              variant="primary"
-            >
-              📄 Proposals
-            </Button>
-            <Button 
-              onClick={fetchLeads}
-              variant="secondary"
-            >
-              Refresh
-            </Button>
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-            >
-              Sign Out
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={fetchLeads}
+                variant="secondary"
+                size="sm"
+              >
+                ↻ Refresh
+              </Button>
+            </div>
           </div>
-        </div>
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 rounded p-4 mb-4">
-            {error}
-          </div>
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 rounded p-4 mb-4">
+              {error}
+            </div>
+          )}
+
+          <BusinessDashboard leads={leads} proposals={proposals} />
+
+        {/* Lead Modal */}
+        {selectedLead && (
+          <LeadModal
+            lead={selectedLead}
+            onClose={() => setSelectedLead(null)}
+            onStatusUpdate={handleStatusUpdate}
+          />
         )}
-
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <Card padding="sm">
-            <h3 className="text-sm text-gray-400 mb-2">Total Leads</h3>
-            <p className="text-3xl font-bold">{leads.length}</p>
-          </Card>
-          <Card padding="sm">
-            <h3 className="text-sm text-gray-400 mb-2">New Leads</h3>
-            <p className="text-3xl font-bold text-cyan-400">
-              {leads.filter(l => l.status === "new").length}
-            </p>
-          </Card>
-          <Card padding="sm">
-            <h3 className="text-sm text-gray-400 mb-2">Contacted</h3>
-            <p className="text-3xl font-bold text-green-500">
-              {leads.filter(l => l.status === "contacted").length}
-            </p>
-          </Card>
-          <Card padding="sm">
-            <h3 className="text-sm text-gray-400 mb-2">Today</h3>
-            <p className="text-3xl font-bold text-yellow-400">
-              {leads.filter(l => {
-                const today = new Date().setHours(0,0,0,0);
-                return new Date(l.createdAt).setHours(0,0,0,0) === today;
-              }).length}
-            </p>
-          </Card>
-        </div>
-
-        <Card padding="none" className="overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-900 border-b border-gray-700">
-              <tr>
-                <th className="px-4 py-3 text-left">Date</th>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Contact</th>
-                <th className="px-4 py-3 text-left">Package</th>
-                <th className="px-4 py-3 text-left">Value</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.map((lead) => (
-                <tr 
-                  key={lead._id} 
-                  className="border-t border-gray-700 hover:bg-gray-700/50 cursor-pointer transition-colors"
-                  onClick={() => handleLeadClick(lead)}
-                >
-                  <td className="px-4 py-3 text-sm">
-                    {new Date(lead.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{lead.name || "No name"}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-sm">{lead.email}</div>
-                    <div className="text-sm text-gray-400">{lead.phone}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    {lead.selectedPackage || "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {lead.estimatedTotal ? `$${lead.estimatedTotal.toLocaleString()}` : "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      variant={
-                        lead.status === "new" ? "info" : 
-                        lead.status === "contacted" ? "warning" :
-                        lead.status === "qualified" ? "purple" :
-                        lead.status === "won" ? "success" :
-                        lead.status === "lost" ? "error" :
-                        "default"
-                      }
-                      size="sm"
-                    >
-                      {lead.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      variant={
-                        lead.siteSource === "treeshop.app" ? "success" : 
-                        lead.siteSource === "fltreeshop.com" ? "info" : 
-                        "default"
-                      }
-                      size="sm"
-                    >
-                      {lead.siteSource}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-              {leads.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                    No leads yet. Waiting for submissions from websites...
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </Card>
       </div>
-
-      {/* Lead Modal */}
-      {selectedLead && (
-        <LeadModal
-          lead={selectedLead}
-          onClose={() => setSelectedLead(null)}
-          onStatusUpdate={handleStatusUpdate}
-        />
-      )}
     </div>
+    </AuthenticatedLayout>
   );
 }
