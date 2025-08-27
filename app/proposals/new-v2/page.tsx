@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
@@ -50,7 +50,7 @@ interface ProposalData {
   createdAt: number;
 }
 
-export default function NewProposalV2Page() {
+function ProposalForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const leadId = searchParams.get("leadId");
@@ -552,5 +552,13 @@ export default function NewProposalV2Page() {
         )}
       </DirectoryLayout>
     </AuthenticatedLayout>
+  );
+}
+
+export default function NewProposalV2Page() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><div className="text-green-500">Loading...</div></div>}>
+      <ProposalForm />
+    </Suspense>
   );
 }
