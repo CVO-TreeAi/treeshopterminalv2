@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// Using REAL Convex hooks now!
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+// import { useQuery, useMutation } from "@/lib/mockHooks";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import DataTable, { Column } from "@/components/shared/DataTable";
@@ -65,39 +69,42 @@ export default function InvoicesPage() {
     loadInvoices();
   }, []);
 
-  const loadInvoices = async () => {
-    try {
-      setLoading(true);
-      // TODO: Replace with actual Convex query
-      // const data = await convex.query(api.invoices.getAll);
-      // setInvoices(data);
-      
-      // No fake data - real invoices only
-      setInvoices([]);
-    } catch (error) {
-      console.error("Error loading invoices:", error);
-    } finally {
+  const invoicesData = useQuery(api.invoices.getInvoices, { limit: 100 });
+  const createInvoiceMutation = useMutation(api.invoices.createInvoice);
+  const updateInvoiceStatusMutation = useMutation(api.invoices.updateInvoiceStatus);
+  const deleteInvoiceMutation = useMutation(api.invoices.deleteInvoice);
+
+  useEffect(() => {
+    if (invoicesData) {
+      setInvoices(invoicesData);
       setLoading(false);
     }
+  }, [invoicesData]);
+
+  const loadInvoices = () => {
+    // Data automatically loads via useQuery hook
+    setLoading(invoicesData === undefined);
   };
 
   const createInvoice = async (data: InvoiceFormData) => {
     try {
       setSubmitting(true);
-      const invoiceNumber = `INV-${Date.now()}`;
       
-      // TODO: Replace with actual Convex mutation
-      console.log("Would create invoice:", {
-        invoiceNumber,
-        ...data,
-        total: parseFloat(data.total) || 0,
-        dueDate: data.dueDate ? new Date(data.dueDate).getTime() : undefined,
-        status: "draft",
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+      await createInvoiceMutation({
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        propertyAddress: data.projectAddress,
+        subtotal: parseFloat(data.total) || 0,
+        depositAmount: 0,
+        balanceAmount: parseFloat(data.total) || 0,
+        totalAmount: parseFloat(data.total) || 0,
+        dueAt: data.dueDate ? new Date(data.dueDate).getTime() : Date.now() + (7 * 24 * 60 * 60 * 1000),
+        // Note: This creates a manual invoice, not from a work order
+        workOrderId: "manual", // Will be handled by backend
+        proposalId: "manual",
+        leadId: "manual"
       });
       
-      await loadInvoices();
       setShowCreateForm(false);
       setFormData(initialFormData);
     } catch (error) {
@@ -109,9 +116,10 @@ export default function InvoicesPage() {
 
   const updateInvoiceStatus = async (invoice: Invoice, newStatus: string) => {
     try {
-      // TODO: Replace with actual Convex mutation
-      console.log("Would update invoice status:", invoice._id, newStatus);
-      await loadInvoices();
+      await updateInvoiceStatusMutation({
+        id: invoice._id,
+        status: newStatus as any
+      });
     } catch (error) {
       console.error("Error updating invoice:", error);
     }
@@ -121,9 +129,7 @@ export default function InvoicesPage() {
     if (!confirm("Are you sure you want to delete this invoice?")) return;
     
     try {
-      // TODO: Replace with actual Convex mutation
-      console.log("Would delete invoice:", id);
-      await loadInvoices();
+      await deleteInvoiceMutation({ id });
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }

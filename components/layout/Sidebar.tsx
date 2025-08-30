@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { TREESHOP_BUSINESS_DATA } from "@/lib/treeShopData";
 import Badge from "../ui/Badge";
 
 interface SidebarProps {
@@ -26,25 +27,35 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      // Auto-close sidebar on mobile when screen size changes
-      if (window.innerWidth < 768) {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      
+      // Auto-close sidebar on mobile when screen size changes from desktop to mobile
+      if (mobile && !isMobile && isExpanded) {
         setIsExpanded(false);
       }
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [isMobile, isExpanded, setIsExpanded]);
 
   const navigationItems = [
     {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: "📊",
+      id: "overview",
+      label: "Overview",
+      icon: "🏠",
       path: "/",
-      description: "KPIs & Overview",
+      description: "System Overview",
       badge: null,
+    },
+    {
+      id: "dashboard",
+      label: "Business Dashboard",
+      icon: "📊",
+      path: "/dashboard",
+      description: "Complete Business Metrics",
+      badge: "new",
     },
     {
       id: "leads",
@@ -76,6 +87,22 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
       icon: "📅",
       path: "/calendar",
       description: "Schedule & Jobs",
+      badge: null,
+    },
+    {
+      id: "crew",
+      label: "Crew App",
+      icon: "🚛",
+      path: "/crew",
+      description: "Mobile Crew Portal",
+      badge: "mobile",
+    },
+    {
+      id: "time-tracking",
+      label: "Time Tracking",
+      icon: "⏱️",
+      path: "/crew/time-tracking",
+      description: "Activity Logging",
       badge: null,
     },
     {
@@ -127,40 +154,47 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
       {/* Sidebar Toggle Button (Always Visible) */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="fixed right-4 top-4 z-50 p-2 md:p-3 bg-green-500 hover:bg-green-400 text-black rounded-lg transition-all shadow-lg"
+        className="fixed right-4 top-4 z-50 p-3 bg-[var(--accent-green)] hover:bg-[var(--muted-green)] text-[var(--font-on-accent)] rounded-xl transition-all shadow-lg btn-modern"
         aria-label="Toggle menu"
       >
-        <span className="text-lg md:text-base">{isExpanded ? "✕" : "☰"}</span>
+        <span className="text-lg font-medium">{isExpanded ? "✕" : "☰"}</span>
       </button>
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 h-full bg-black border-l border-gray-700 transition-all duration-300 z-40 ${
-          isExpanded ? (isMobile ? "w-full max-w-sm" : "w-64") : "w-0 overflow-hidden"
+        className={`fixed right-0 top-0 h-full bg-[var(--card)] border-l border-[var(--medium-gray)] transition-all duration-300 z-50 shadow-2xl ${
+          isExpanded 
+            ? isMobile 
+              ? "w-full max-w-sm" 
+              : "w-80" // Wider on desktop for better UX
+            : "w-0 overflow-hidden"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-gray-700">
+          <div className="p-6 border-b border-[var(--medium-gray)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-black font-bold">
+              <div className="w-10 h-10 bg-[var(--accent-green)] rounded-xl flex items-center justify-center text-[var(--font-on-accent)] font-bold">
                 T
               </div>
               <div>
-                <h2 className="text-green-500 font-bold">TreeShop Terminal</h2>
-                <p className="text-xs text-gray-400">Master Control</p>
+                <h2 className="text-[var(--accent-green)] font-bold">TreeShop Terminal</h2>
+                <p className="text-xs text-[var(--font-secondary)]">Master Control</p>
               </div>
             </div>
           </div>
 
           {/* User Info */}
-          <div className="p-4 border-b border-gray-700">
+          <div className="p-4 border-b border-[var(--medium-gray)]">
             <div className="text-sm">
-              <p className="text-white font-medium">
-                {user?.name || "Office Manager"}
+              <p className="text-[var(--font-primary)] font-medium">
+                {user?.name || "TreeShop Operations"}
               </p>
-              <p className="text-gray-400 text-xs">
-                {user?.email || "office@fltreeshop.com"}
+              <p className="text-[var(--font-secondary)] text-xs">
+                {user?.email || TREESHOP_BUSINESS_DATA.company.adminEmail}
+              </p>
+              <p className="text-[var(--accent-green)] text-xs font-medium">
+                {TREESHOP_BUSINESS_DATA.company.location}
               </p>
             </div>
           </div>
@@ -174,10 +208,10 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
                   <button
                     key={item.id}
                     onClick={() => handleNavigation(item.path)}
-                    className={`w-full text-left ${isMobile ? "p-4" : "p-3"} rounded-lg transition-all flex items-center justify-between group ${
+                    className={`w-full text-left ${isMobile ? "p-4" : "p-3"} rounded-xl transition-all flex items-center justify-between group ${
                       isActive
-                        ? "bg-green-500/20 border border-green-500/30 text-green-500"
-                        : "hover:bg-gray-800 text-gray-300 hover:text-white"
+                        ? "bg-[var(--accent-green)]/20 border border-[var(--accent-green)]/30 text-[var(--accent-green)]"
+                        : "hover:bg-[var(--soft-gray)] text-[var(--font-secondary)] hover:text-[var(--font-primary)]"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -198,7 +232,7 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
             </div>
 
             {/* Separator */}
-            <div className="my-4 border-t border-gray-700"></div>
+            <div className="my-4 border-t border-[var(--medium-gray)]"></div>
 
             {/* Bottom Navigation */}
             <div className="space-y-1">
@@ -208,10 +242,10 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
                   <button
                     key={item.id}
                     onClick={() => handleNavigation(item.path)}
-                    className={`w-full text-left ${isMobile ? "p-4" : "p-3"} rounded-lg transition-all flex items-center gap-3 group ${
+                    className={`w-full text-left ${isMobile ? "p-4" : "p-3"} rounded-xl transition-all flex items-center gap-3 group ${
                       isActive
-                        ? "bg-green-500/20 border border-green-500/30 text-green-500"
-                        : "hover:bg-gray-800 text-gray-300 hover:text-white"
+                        ? "bg-[var(--accent-green)]/20 border border-[var(--accent-green)]/30 text-[var(--accent-green)]"
+                        : "hover:bg-[var(--soft-gray)] text-[var(--font-secondary)] hover:text-[var(--font-primary)]"
                     }`}
                   >
                     <span className={isMobile ? "text-2xl" : "text-xl"}>{item.icon}</span>
@@ -226,10 +260,10 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 border-t border-gray-700">
+          <div className="p-4 border-t border-[var(--medium-gray)]">
             <button
               onClick={handleLogout}
-              className="w-full p-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all flex items-center justify-center gap-2"
+              className="btn-modern w-full bg-[var(--soft-gray)] hover:bg-[var(--medium-gray)] text-[var(--font-secondary)] hover:text-[var(--font-primary)] rounded-xl transition-all flex items-center justify-center gap-2"
             >
               <span>🚪</span>
               <span>Sign Out</span>
@@ -237,25 +271,37 @@ export default function Sidebar({ user, isExpanded: externalIsExpanded, setIsExp
           </div>
 
           {/* Quick Stats */}
-          <div className="p-4 border-t border-gray-700 bg-gray-900">
+          <div className="p-4 border-t border-[var(--medium-gray)] bg-[var(--soft-gray)]">
             <div className="grid grid-cols-2 gap-2 text-center">
               <div>
-                <p className="text-2xl font-bold text-green-500">4</p>
-                <p className="text-xs text-gray-400">Active Leads</p>
+                <p className="text-2xl font-bold text-[var(--accent-green)]">
+                  {TREESHOP_BUSINESS_DATA.kpis.activeProjects}
+                </p>
+                <p className="text-xs text-[var(--font-secondary)]">Active Projects</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-yellow-400">2</p>
-                <p className="text-xs text-gray-400">Pending</p>
+                <p className="text-2xl font-bold text-[var(--amber)]">
+                  {TREESHOP_BUSINESS_DATA.kpis.activeCrew}
+                </p>
+                <p className="text-xs text-[var(--font-secondary)]">Active Crew</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-1 text-center mt-3 pt-3 border-t border-[var(--medium-gray)]">
+              <div>
+                <p className="text-lg font-bold text-[var(--soft-blue)]">
+                  ${(TREESHOP_BUSINESS_DATA.kpis.monthlyRevenue / 1000).toFixed(0)}K
+                </p>
+                <p className="text-xs text-[var(--font-secondary)]">Monthly Revenue</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Overlay for mobile */}
-      {isExpanded && (
+      {/* Overlay for mobile ONLY */}
+      {isExpanded && isMobile && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
           onClick={() => setIsExpanded(false)}
         />
       )}

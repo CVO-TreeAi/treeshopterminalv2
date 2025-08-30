@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+// import { mockLeads, mockProposals } from "@/lib/mockData";
 import LeadModal from "@/components/LeadModal";
 import DualPinLogin from "@/components/DualPinLogin";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
@@ -64,49 +67,57 @@ export default function Home() {
     setLoading(false);
   }, []);
 
-  // No mock data - all data from real operations
+  // Using REAL Convex data now!
+  const realLeads = useQuery(api.leads.getLeads, { limit: 50 });
+  const realProposals = useQuery(api.proposals.getProposals, { limit: 50 });
 
   const fetchLeads = async () => {
     try {
-      console.log("Fetching leads from Convex...");
-      const response = await fetch(
-        "https://earnest-lemming-634.convex.cloud/api/query",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "terminalSync:syncLeadsToTerminal",
-            args: {},
-          }),
-        }
-      );
-
-      const data = await response.json();
-      console.log("Convex response:", data);
-      
-      if (data.status === "success" && data.value) {
-        const leads = data.value.completedLeads || [];
-        console.log(`Found ${leads.length} leads`);
-        setLeads(leads);
+      if (realLeads) {
+        console.log("Loading REAL leads from Convex...", realLeads);
+        // Transform real data to match expected interface
+        const transformedLeads = realLeads.map(lead => ({
+          _id: lead._id,
+          name: lead.customerInfo?.name || lead.name || 'Unknown',
+          email: lead.customerInfo?.email || lead.email || '',
+          phone: lead.customerInfo?.phone || lead.phone || '',
+          address: lead.propertyAddress || `${lead.customerInfo?.address?.street || ''}, ${lead.customerInfo?.address?.city || ''}, ${lead.customerInfo?.address?.state || ''}`,
+          acreage: lead.estimatedAcreage || 0,
+          selectedPackage: lead.packageType || 'Unknown',
+          estimatedTotal: lead.instantQuote || lead.proposal?.estimatedCost || 0,
+          notes: lead.additionalDetails || lead.serviceDetails?.description || '',
+          siteSource: lead.source,
+          status: lead.status,
+          createdAt: lead.createdAt,
+          updatedAt: lead.updatedAt,
+          leadSource: lead.source,
+          leadScore: lead.priority || (lead.status === 'new' ? 'High' : 'Medium'),
+          obstacles: []
+        }));
+        setLeads(transformedLeads);
         setError("");
-      } else {
-        console.error("Failed response:", data);
-        setError("Failed to fetch leads");
+        console.log(`Loaded ${transformedLeads.length} REAL leads from Convex!`);
       }
     } catch (err) {
-      console.error("Error fetching leads:", err);
-      setError("Connection error: " + (err instanceof Error ? err.message : String(err)));
+      console.error("Error loading real leads:", err);
+      setError("Error loading data: " + (err instanceof Error ? err.message : String(err)));
     }
   };
 
   useEffect(() => {
     if (authenticated) {
       fetchLeads();
-      setProposals([]); // No mock proposals - real data only
-      const interval = setInterval(fetchLeads, 10000); // Refresh every 10 seconds
-      return () => clearInterval(interval);
+      if (realProposals) {
+        setProposals(realProposals.map(prop => ({
+          _id: prop._id,
+          proposalNumber: `PROP-${prop._id.slice(-6)}`,
+          status: prop.status as any,
+          total: prop.finalPrice || 0,
+          createdAt: prop.createdAt
+        })));
+      }
     }
-  }, [authenticated]);
+  }, [authenticated, realLeads, realProposals]); // Update when real data changes
 
   const handleLeadClick = (lead: Lead) => {
     setSelectedLead(lead);

@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// TODO: Replace with actual Convex hooks when backend is deployed
+// import { useQuery, useMutation } from "convex/react";
+// import { api } from "@/convex/_generated/api";
+import { useQuery, useMutation } from "@/lib/mockHooks";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import DataTable, { Column } from "@/components/shared/DataTable";
@@ -64,20 +68,20 @@ export default function WorkOrdersPage() {
     loadWorkOrders();
   }, []);
 
-  const loadWorkOrders = async () => {
-    try {
-      setLoading(true);
-      // TODO: Replace with actual Convex query
-      // const data = await convex.query(api.workOrders.getAll);
-      // setWorkOrders(data);
-      
-      // No fake data - real work orders only
-      setWorkOrders([]);
-    } catch (error) {
-      console.error("Error loading work orders:", error);
-    } finally {
+  const workOrdersData = useQuery('api.workOrders.getWorkOrders', { limit: 100 });
+  const updateWorkOrderMutation = useMutation('api.workOrders.updateWorkOrder');
+  const scheduleWorkOrderMutation = useMutation('api.workOrders.scheduleWorkOrder');
+
+  useEffect(() => {
+    if (workOrdersData) {
+      setWorkOrders(workOrdersData);
       setLoading(false);
     }
+  }, [workOrdersData]);
+
+  const loadWorkOrders = () => {
+    // Data automatically loads via useQuery hook
+    setLoading(workOrdersData === undefined);
   };
 
   const createWorkOrder = async (data: WorkOrderFormData) => {
@@ -85,18 +89,16 @@ export default function WorkOrdersPage() {
       setSubmitting(true);
       const workOrderNumber = `WO-${Date.now()}`;
       
-      // TODO: Replace with actual Convex mutation
-      console.log("Would create work order:", {
+      // Note: Creating work orders manually - typically they're created from accepted proposals
+      console.log("Manual work order creation not fully implemented yet - work orders are typically created from accepted proposals");
+      console.log("Work order data:", {
         workOrderNumber,
         ...data,
         services: data.services.split(",").map(s => s.trim()),
         totalAmount: parseFloat(data.totalAmount) || 0,
         scheduledDate: data.scheduledDate ? new Date(data.scheduledDate).getTime() : undefined,
         crewAssigned: data.crewAssigned.split(",").map(s => s.trim()),
-        equipmentRequired: data.equipmentRequired.split(",").map(s => s.trim()),
-        status: "scheduled",
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+        equipmentRequired: data.equipmentRequired.split(",").map(s => s.trim())
       });
       
       await loadWorkOrders();
@@ -111,9 +113,13 @@ export default function WorkOrdersPage() {
 
   const updateWorkOrder = async (id: string, updates: Partial<WorkOrder>) => {
     try {
-      // TODO: Replace with actual Convex mutation
-      console.log("Would update work order:", id, updates);
-      await loadWorkOrders();
+      await updateWorkOrderMutation({
+        id,
+        scheduledDate: updates.scheduledDate,
+        assignedCrew: updates.crewAssigned?.[0],
+        equipment: updates.equipmentRequired,
+        specialInstructions: updates.notes,
+      });
     } catch (error) {
       console.error("Error updating work order:", error);
     }
@@ -123,9 +129,8 @@ export default function WorkOrdersPage() {
     if (!confirm("Are you sure you want to delete this work order?")) return;
     
     try {
-      // TODO: Replace with actual Convex mutation
-      console.log("Would delete work order:", id);
-      await loadWorkOrders();
+      // Note: In production, work orders should typically be cancelled rather than deleted
+      console.log("Work order deletion not implemented - consider changing status to cancelled instead:", id);
     } catch (error) {
       console.error("Error deleting work order:", error);
     }

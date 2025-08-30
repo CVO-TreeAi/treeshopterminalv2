@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// TODO: Replace with actual Convex hooks when backend is deployed
+// import { useQuery } from "convex/react";
+// import { api } from "@/convex/_generated/api";
+import { useQuery } from "@/lib/mockHooks";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import Card from "@/components/ui/Card";
@@ -31,34 +35,32 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "quarter" | "year">("month");
 
+  // Initialize loading state
   useEffect(() => {
-    loadKPIData();
+    setLoading(true);
   }, [selectedPeriod]);
 
-  const loadKPIData = async () => {
-    try {
-      setLoading(true);
-      // TODO: Replace with actual Convex queries
-      // const data = await convex.query(api.reports.getKPIs, { period: selectedPeriod });
-      // setKpiData(data);
-      
-      // No fake data - real metrics only
+  // Use real data from Convex queries (currently mocked)
+  const leadStats = useQuery('api.leads.getLeadStats');
+  const proposalStats = useQuery('api.proposals.getProposalStats');
+  const workOrderStats = useQuery('api.workOrders.getWorkOrderStats');
+  const invoiceStats = useQuery('api.invoices.getInvoiceStats');
+
+  useEffect(() => {
+    if (leadStats && proposalStats && workOrderStats && invoiceStats) {
       setKpiData({
-        totalLeads: 0,
-        totalProposals: 0,
-        totalCustomers: 0,
-        conversionRate: 0,
+        totalLeads: leadStats.total,
+        totalProposals: proposalStats.total,
+        totalCustomers: leadStats.total, // Customers are derived from leads
+        conversionRate: leadStats.conversionRate,
         averageProjectValue: 0,
         monthlyRevenue: 0,
         activeProjects: 0,
         completedProjects: 0
       });
-    } catch (error) {
-      console.error("Error loading KPI data:", error);
-    } finally {
       setLoading(false);
     }
-  };
+  }, [leadStats, proposalStats, workOrderStats, invoiceStats]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {

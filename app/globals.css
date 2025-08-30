@@ -1,35 +1,55 @@
 @import "tailwindcss";
 
 :root {
-  /* Core Brand Colors */
-  --black: #000000;
-  --white: #FFFFFF;
-  --green-400: #86EFAC;
-  --green-500: #4ADE80;
-  --green-600: #22C55E;
+  /* === CORE PALETTE === */
+  /* Primary Colors */
+  --background: #000000;          /* pure black */
+  --card: #0A0A0A;                /* near-black cards */
+  --accent-green: #00FF41;        /* electric bright green */
+  --accent-white: #FFFFFF;        /* pure white */
   
-  /* Accent Colors */
-  --cyan-400: #22D3EE;
-  --yellow-400: #FACC15;
-  --orange-500: #FB923C;
-  --red-500: #EF4444;
-  --purple-500: #A855F7;
+  /* Secondary Colors */
+  --soft-gray: #1A1A1A;          /* sections, subtle borders */
+  --medium-gray: #2A2A2A;        /* dividers */
+  --muted-green: #00D938;        /* bright tags, icons */
+  --hot-red: #FF0040;            /* bright red alerts */
+  --amber: #FFE500;              /* electric yellow */
   
-  /* Backgrounds */
-  --background: #000000;
-  --foreground: #FFFFFF;
-  --bg-primary: #000000;
-  --bg-secondary: #111827;
-  --bg-card: #1F2937;
+  /* Supporting Colors */
+  --soft-pink: #FF3D8A;          /* bright pink notifications */
+  --soft-blue: #00BFFF;          /* electric blue info */
+  --light-orange: #FF8C00;       /* bright orange warnings */
   
-  /* Text */
-  --text-primary: #FFFFFF;
-  --text-secondary: #E5E7EB;
-  --text-muted: #9CA3AF;
+  /* === FONT COLOR SYSTEM === */
+  --font-primary: #FFFFFF;       /* pure white, headers/body */
+  --font-secondary: #CCCCCC;     /* bright gray, helper text */
+  --font-on-accent: #000000;     /* pure black, on neon backgrounds */
+  --font-on-accent-secondary: #0A0A0A; /* card dark, on lighter accents */
+  --font-interactive: #00FF41;   /* electric green for links/buttons */
   
-  /* Borders */
-  --border-default: #374151;
-  --border-focus: #4ADE80;
+  /* === LEGACY MAPPINGS FOR COMPATIBILITY === */
+  --foreground: var(--font-primary);
+  --bg-primary: var(--background);
+  --bg-secondary: var(--soft-gray);
+  --bg-card: var(--card);
+  --text-primary: var(--font-primary);
+  --text-secondary: var(--font-secondary);
+  --text-muted: var(--font-secondary);
+  --border-default: var(--medium-gray);
+  --border-focus: var(--accent-green);
+  
+  /* Button & Interactive States */
+  --button-default-bg: var(--card);
+  --button-default-text: var(--font-primary);
+  --button-default-border: var(--medium-gray);
+  --button-hover-bg: var(--medium-gray);
+  --button-hover-text: var(--accent-green);
+  --button-hover-border: var(--accent-green);
+  --button-active-bg: var(--accent-green);
+  --button-active-text: var(--font-on-accent);
+  --button-active-border: var(--amber);
+  --button-disabled-bg: var(--soft-gray);
+  --button-disabled-text: var(--font-secondary);
 }
 
 @theme inline {
@@ -40,41 +60,189 @@
 }
 
 body {
-  background: #000000;
-  color: #FFFFFF;
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--background);
+  color: var(--font-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+  font-weight: 400;
+  line-height: 1.6;
 }
 
-/* Custom scrollbar for black theme */
+/* === CUSTOM SCROLLBAR === */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #111827;
+  background: var(--soft-gray);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4ADE80;
+  background: var(--accent-green);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #86EFAC;
+  background: var(--muted-green);
 }
 
-/* Remove all gray backgrounds - force pure black */
-.bg-gray-900 {
-  background-color: #000000 !important;
+/* === APP-LIKE LAYOUT HELPERS === */
+.app-container {
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
 }
 
-.bg-gray-800 {
-  background-color: #111827 !important;
+.app-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--medium-gray);
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 
-.bg-gray-700 {
-  background-color: #1F2937 !important;
+.app-content {
+  flex: 1;
+  background: var(--background);
+}
+
+.app-section {
+  background: var(--card);
+  border: 1px solid var(--medium-gray);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.app-section:hover {
+  border-color: var(--accent-green);
+  box-shadow: 0 4px 20px rgba(199, 255, 43, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* === MODERN CARD SYSTEM === */
+.card-modern {
+  background: var(--card);
+  border: 1px solid var(--medium-gray);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(199, 255, 43, 0.12);
+  border-color: var(--accent-green);
+}
+
+.card-modern.selected {
+  background: var(--accent-green);
+  color: var(--font-on-accent);
+  border-color: var(--amber);
+  box-shadow: 0 4px 20px rgba(199, 255, 43, 0.3);
+}
+
+.card-modern.alert {
+  background: var(--hot-red);
+  color: var(--accent-white);
+  border-color: var(--soft-pink);
+}
+
+/* === BUTTON SYSTEM === */
+.btn-modern {
+  background: var(--button-default-bg);
+  color: var(--button-default-text);
+  border: 1px solid var(--button-default-border);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-modern:hover {
+  background: var(--button-hover-bg);
+  color: var(--button-hover-text);
+  border-color: var(--button-hover-border);
+  transform: translateY(-1px);
+}
+
+.btn-modern:active {
+  background: var(--button-active-bg);
+  color: var(--button-active-text);
+  border-color: var(--button-active-border);
+  transform: translateY(0);
+}
+
+.btn-modern:disabled {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border-color: transparent;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--accent-green);
+  color: var(--font-on-accent);
+  border-color: var(--accent-green);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: var(--muted-green);
+  color: var(--font-on-accent);
+  border-color: var(--muted-green);
+}
+
+/* === INPUT SYSTEM === */
+.input-modern {
+  background: var(--card);
+  color: var(--font-primary);
+  border: 1px solid var(--medium-gray);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.input-modern:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(199, 255, 43, 0.1);
+}
+
+.input-modern::placeholder {
+  color: var(--font-secondary);
+}
+
+/* === STATUS INDICATORS === */
+.status-success { background: var(--muted-green); color: var(--font-on-accent); }
+.status-warning { background: var(--light-orange); color: var(--font-on-accent); }
+.status-info { background: var(--soft-blue); color: var(--font-on-accent); }
+.status-error { background: var(--hot-red); color: var(--accent-white); }
+
+/* === MOBILE OPTIMIZATIONS === */
+@media (max-width: 768px) {
+  .app-section {
+    border-radius: 8px;
+    margin: 8px;
+  }
+  
+  .card-modern {
+    border-radius: 12px;
+  }
+  
+  .btn-modern {
+    padding: 16px 20px;
+    font-size: 16px;
+    border-radius: 12px;
+    min-height: 48px;
+  }
 }

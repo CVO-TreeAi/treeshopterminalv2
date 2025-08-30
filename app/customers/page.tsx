@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+// TODO: Replace with actual Convex hooks when backend is deployed
+// import { useQuery, useMutation } from "convex/react";
+// import { api } from "@/convex/_generated/api";
+import { useQuery, useMutation } from "@/lib/mockHooks";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import DirectoryLayout from "@/components/shared/DirectoryLayout";
 import DataTable, { Column } from "@/components/shared/DataTable";
@@ -71,20 +75,35 @@ export default function CustomersPage() {
     loadCustomers();
   }, []);
 
-  const loadCustomers = async () => {
-    try {
-      setLoading(true);
-      // TODO: Replace with actual Convex query
-      // const response = await convex.query(api.customers.getAll);
-      // setCustomers(response);
-      
-      // For now, empty array - no fake data
-      setCustomers([]);
-    } catch (error) {
-      console.error("Error loading customers:", error);
-    } finally {
+  // Note: Customers are derived from leads - using leads as customers
+  const leadsData = useQuery('api.leads.getLeads', { limit: 100 });
+  const updateLeadMutation = useMutation('api.leads.updateLead');
+
+  useEffect(() => {
+    if (leadsData) {
+      // Transform leads to customer format
+      const customersFromLeads = leadsData.map(lead => ({
+        _id: lead._id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        address: lead.propertyAddress,
+        totalProjects: 1, // Will be calculated properly in production
+        totalRevenue: lead.instantQuote || 0,
+        lastProjectDate: lead.updatedAt || lead.createdAt,
+        status: lead.status === "accepted" ? "active" : "prospect",
+        createdAt: lead.createdAt,
+        updatedAt: lead.updatedAt || lead.createdAt,
+        notes: lead.additionalDetails || ""
+      }));
+      setCustomers(customersFromLeads);
       setLoading(false);
     }
+  }, [leadsData]);
+
+  const loadCustomers = () => {
+    // Data automatically loads via useQuery hook
+    setLoading(leadsData === undefined);
   };
 
   // Create new customer
@@ -100,7 +119,8 @@ export default function CustomersPage() {
       //   updatedAt: Date.now()
       // });
       
-      console.log("Would create customer:", data);
+      // Note: Customers are created as leads first in the TreeShop workflow
+      console.log("Customer creation should typically go through the lead process first:", data);
       await loadCustomers();
       setShowCreateForm(false);
       setFormData(initialFormData);
@@ -122,7 +142,11 @@ export default function CustomersPage() {
       //   updatedAt: Date.now()
       // });
       
-      console.log("Would update customer:", id, data);
+      // Update the underlying lead record
+      await updateLeadMutation({
+        id: id as any,
+        additionalDetails: data.notes
+      });
       await loadCustomers();
       setEditingCustomer(null);
       setFormData(initialFormData);
@@ -141,7 +165,8 @@ export default function CustomersPage() {
       // TODO: Replace with actual Convex mutation
       // await convex.mutation(api.customers.delete, { id });
       
-      console.log("Would delete customer:", id);
+      // Note: In production, customers should typically be deactivated rather than deleted
+      console.log("Customer deletion not implemented - customer data preservation is important:", id);
       await loadCustomers();
     } catch (error) {
       console.error("Error deleting customer:", error);
