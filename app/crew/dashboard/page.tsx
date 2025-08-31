@@ -24,9 +24,9 @@ export default function CrewDashboardPage() {
   const [currentShiftHours, setCurrentShiftHours] = useState(0);
   
   // Get data from Convex (fallback to mock data for deployment)
-  const todaysWorkOrders = []; // useQuery(api.workOrders.getTodaysWorkOrders) || [];
-  const activeTimeEntries = []; // useQuery(api.timeTracking.getActiveTimeEntries, { userId: "current-user" }) || [];
-  const dailyTimeSummary = null; // useQuery(api.timeTracking.getDailyTimeSummary, { date: Date.now(), userId: "current-user" });
+  const todaysWorkOrders: any[] = []; // useQuery(api.workOrders.getTodaysWorkOrders) || [];
+  const activeTimeEntries: any[] = []; // useQuery(api.timeTracking.getActiveTimeEntries, { userId: "current-user" }) || [];
+  const dailyTimeSummary: any = null; // useQuery(api.timeTracking.getDailyTimeSummary, { date: Date.now(), userId: "current-user" });
   
   // Check mobile device
   useEffect(() => {
