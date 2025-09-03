@@ -38,15 +38,18 @@ export const getTimeEntries = query({
 export const getActiveTimeEntries = query({
   args: { workOrderId: v.optional(v.id("workOrders")) },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("timeEntries");
+    const query = ctx.db
+      .query("timeEntries")
+      .fullTableScan();
     
-    if (args.workOrderId) {
-      query = query.withIndex("by_work_order", (q) => q.eq("workOrderId", args.workOrderId));
-    }
-    
-    const activeEntries = await query
+    let activeEntries = await query
       .filter((q) => q.eq(q.field("endTime"), undefined))
       .collect();
+    
+    // Filter by workOrderId if provided
+    if (args.workOrderId) {
+      activeEntries = activeEntries.filter(entry => entry.workOrderId === args.workOrderId);
+    }
     
     // Enrich with work order and user data
     const enriched = await Promise.all(

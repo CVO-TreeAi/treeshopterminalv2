@@ -201,9 +201,9 @@ function ProposalForm() {
         total: item.total,
       })),
       pricing: {
-        subtotal: proposal.pricingResult.subtotal,
-        total: proposal.pricingResult.total,
-        deposit: proposal.pricingResult.deposit,
+        subtotal: (proposal.pricingResult as any).subtotal || 0,
+        total: (proposal.pricingResult as any).total || 0,
+        deposit: (proposal.pricingResult as any).deposit || 0,
       },
       notes: proposal.notes,
     };
@@ -544,9 +544,9 @@ function ProposalForm() {
         total: item.total,
       })),
                         pricing: {
-                          subtotal: proposal.pricingResult.subtotal,
-                          total: proposal.pricingResult.total,
-                          deposit: proposal.pricingResult.deposit,
+                          subtotal: (proposal.pricingResult as any).subtotal || 0,
+                          total: (proposal.pricingResult as any).total || 0,
+                          deposit: (proposal.pricingResult as any).deposit || 0,
                         },
                         notes: proposal.notes,
                       }}

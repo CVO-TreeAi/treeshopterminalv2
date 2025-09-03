@@ -76,7 +76,7 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     if (invoicesData) {
-      setInvoices(invoicesData);
+      setInvoices(invoicesData as any);
       setLoading(false);
     }
   }, [invoicesData]);
@@ -100,9 +100,9 @@ export default function InvoicesPage() {
         totalAmount: parseFloat(data.total) || 0,
         dueAt: data.dueDate ? new Date(data.dueDate).getTime() : Date.now() + (7 * 24 * 60 * 60 * 1000),
         // Note: This creates a manual invoice, not from a work order
-        workOrderId: "manual", // Will be handled by backend
-        proposalId: "manual",
-        leadId: "manual"
+        workOrderId: "manual" as any, // Will be handled by backend
+        proposalId: "manual" as any,
+        leadId: "manual" as any
       });
       
       setShowCreateForm(false);
@@ -117,7 +117,7 @@ export default function InvoicesPage() {
   const updateInvoiceStatus = async (invoice: Invoice, newStatus: string) => {
     try {
       await updateInvoiceStatusMutation({
-        id: invoice._id,
+        id: invoice._id as any,
         status: newStatus as any
       });
     } catch (error) {
@@ -129,7 +129,7 @@ export default function InvoicesPage() {
     if (!confirm("Are you sure you want to delete this invoice?")) return;
     
     try {
-      await deleteInvoiceMutation({ id });
+      await deleteInvoiceMutation({ id: id as any });
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }

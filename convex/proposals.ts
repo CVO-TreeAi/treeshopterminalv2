@@ -72,7 +72,7 @@ export const createProposal = mutation({
       "Max": 4500,      // Land clearing - $4,500/day (estimated per acre)
     };
     
-    const packageRate = packageRates[lead.packageType] || packageRates["Medium"];
+    const packageRate = packageRates[lead.packageType || "Medium"] || packageRates["Medium"];
     const subtotal = packageRate * args.workAreaAcreage;
     
     // Transport cost calculation (simplified - in real app, use zip code database)
@@ -205,11 +205,11 @@ export const acceptProposal = mutation({
       proposalId: args.id,
       leadId: proposal.leadId,
       projectNumber: projectNumber,
-      customerName: lead.name,
-      customerEmail: lead.email,
-      customerPhone: lead.phone,
-      propertyAddress: lead.propertyAddress,
-      packageType: lead.packageType,
+      customerName: lead.name || '',
+      customerEmail: lead.email || '',
+      customerPhone: lead.phone || '',
+      propertyAddress: lead.propertyAddress || '',
+      packageType: lead.packageType || 'Medium',
       workAreaAcreage: proposal.workAreaAcreage,
       scopeOfWork: proposal.scopeOfWork,
       status: "scheduled",
@@ -265,7 +265,7 @@ export const updateProposal = mutation({
             "X-Large": 4250, "Max": 4500,
           };
           
-          const packageRate = packageRates[lead.packageType] || packageRates["Medium"];
+          const packageRate = packageRates[lead.packageType || "Medium"] || packageRates["Medium"];
           const subtotal = Math.max(packageRate * args.workAreaAcreage, 1900);
           const transportCost = 150 * 2;
           const finalPrice = Math.round((subtotal + transportCost) * 1.15);

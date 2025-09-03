@@ -88,13 +88,20 @@ export class MockStore {
   updateInvoiceStatus(id: string, status: string) {
     const index = this.invoices.findIndex(inv => inv._id === id);
     if (index > -1) {
-      this.invoices[index] = {
+      const updatedInvoice = {
         ...this.invoices[index],
         status: status as any,
-        updatedAt: Date.now(),
-        ...(status === 'sent' && { sentDate: Date.now() }),
-        ...(status === 'paid' && { paidDate: Date.now() })
+        updatedAt: Date.now()
       };
+      
+      if (status === 'sent') {
+        (updatedInvoice as any).sentDate = Date.now();
+      }
+      if (status === 'paid') {
+        (updatedInvoice as any).paidDate = Date.now();
+      }
+      
+      this.invoices[index] = updatedInvoice;
       this.notify();
     }
     return id;
@@ -168,12 +175,12 @@ export class MockStore {
     const proposals = this.proposals;
     return {
       total: proposals.length,
-      accepted: proposals.filter(p => p.status === 'approved').length,
-      sent: proposals.filter(p => p.status === 'sent').length,
-      draft: proposals.filter(p => p.status === 'draft').length,
+      accepted: proposals.filter((p: any) => p.status === 'approved').length,
+      sent: proposals.filter((p: any) => p.status === 'sent').length,
+      draft: proposals.filter((p: any) => p.status === 'draft').length,
       totalValue: proposals.reduce((sum, p) => sum + p.total, 0),
-      acceptedValue: proposals.filter(p => p.status === 'approved').reduce((sum, p) => sum + p.total, 0),
-      conversionRate: proposals.length > 0 ? (proposals.filter(p => p.status === 'approved').length / proposals.length * 100) : 0
+      acceptedValue: proposals.filter((p: any) => p.status === 'approved').reduce((sum, p) => sum + p.total, 0),
+      conversionRate: proposals.length > 0 ? (proposals.filter((p: any) => p.status === 'approved').length / proposals.length * 100) : 0
     };
   }
   
@@ -181,12 +188,12 @@ export class MockStore {
     const workOrders = this.workOrders;
     return {
       total: workOrders.length,
-      completed: workOrders.filter(wo => wo.status === 'completed').length,
-      inProgress: workOrders.filter(wo => wo.status === 'in-progress').length,
-      scheduled: workOrders.filter(wo => wo.status === 'scheduled').length,
-      totalRevenue: workOrders.filter(wo => wo.status === 'completed').reduce((sum, wo) => sum + wo.totalAmount, 0),
-      averageValue: workOrders.length > 0 ? workOrders.reduce((sum, wo) => sum + wo.totalAmount, 0) / workOrders.length : 0,
-      completionRate: workOrders.length > 0 ? (workOrders.filter(wo => wo.status === 'completed').length / workOrders.length * 100) : 0
+      completed: workOrders.filter((wo: any) => wo.status === 'completed').length,
+      inProgress: workOrders.filter((wo: any) => wo.status === 'in-progress').length,
+      scheduled: workOrders.filter((wo: any) => wo.status === 'scheduled').length,
+      totalRevenue: workOrders.filter((wo: any) => wo.status === 'completed').reduce((sum, wo: any) => sum + (wo.totalAmount || 0), 0),
+      averageValue: workOrders.length > 0 ? workOrders.reduce((sum, wo: any) => sum + (wo.totalAmount || 0), 0) / workOrders.length : 0,
+      completionRate: workOrders.length > 0 ? (workOrders.filter((wo: any) => wo.status === 'completed').length / workOrders.length * 100) : 0
     };
   }
   
@@ -194,14 +201,14 @@ export class MockStore {
     const invoices = this.invoices;
     return {
       total: invoices.length,
-      paid: invoices.filter(inv => inv.status === 'paid').length,
-      sent: invoices.filter(inv => inv.status === 'sent').length,
-      overdue: invoices.filter(inv => inv.status === 'overdue').length,
+      paid: invoices.filter((inv: any) => inv.status === 'paid').length,
+      sent: invoices.filter((inv: any) => inv.status === 'sent').length,
+      overdue: invoices.filter((inv: any) => inv.status === 'overdue').length,
       totalAmount: invoices.reduce((sum, inv) => sum + inv.total, 0),
-      paidAmount: invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0),
-      outstandingAmount: invoices.filter(inv => ['sent', 'overdue'].includes(inv.status)).reduce((sum, inv) => sum + inv.total, 0),
+      paidAmount: invoices.filter((inv: any) => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0),
+      outstandingAmount: invoices.filter((inv: any) => ['sent', 'overdue'].includes(inv.status)).reduce((sum, inv) => sum + inv.total, 0),
       totalLateFees: 0, // Mock value
-      collectionRate: invoices.length > 0 ? (invoices.filter(inv => inv.status === 'paid').length / invoices.length * 100) : 0
+      collectionRate: invoices.length > 0 ? (invoices.filter((inv: any) => inv.status === 'paid').length / invoices.length * 100) : 0
     };
   }
 }

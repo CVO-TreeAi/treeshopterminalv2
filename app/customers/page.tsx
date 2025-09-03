@@ -80,18 +80,18 @@ export default function CustomersPage() {
   const updateLeadMutation = useMutation('api.leads.updateLead');
 
   useEffect(() => {
-    if (leadsData) {
+    if (leadsData && Array.isArray(leadsData)) {
       // Transform leads to customer format
-      const customersFromLeads = leadsData.map(lead => ({
+      const customersFromLeads = leadsData.map((lead: any) => ({
         _id: lead._id,
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        address: lead.propertyAddress,
+        name: lead.name || lead.customerName,
+        email: lead.email || '',
+        phone: lead.phone || '',
+        address: lead.propertyAddress || '',
         totalProjects: 1, // Will be calculated properly in production
-        totalRevenue: lead.instantQuote || 0,
+        totalRevenue: lead.instantQuote || lead.total || 0,
         lastProjectDate: lead.updatedAt || lead.createdAt,
-        status: lead.status === "accepted" ? "active" : "prospect",
+        status: (lead.status === "accepted" ? "active" : "prospect") as "active" | "inactive" | "prospect",
         createdAt: lead.createdAt,
         updatedAt: lead.updatedAt || lead.createdAt,
         notes: lead.additionalDetails || ""

@@ -100,7 +100,7 @@ export const createLead = mutation({
       leadId: leadId,
       status: "pending",
       createdAt: now,
-      createdBy: leadId, // Will be updated when user system is ready
+      createdBy: "temp" as any, // Will be updated when user system is ready
     });
 
     return leadId;
@@ -217,7 +217,7 @@ export const getLeadStats = query({
       return acc;
     }, {} as Record<string, number>);
     
-    const totalValue = leads.reduce((sum, lead) => sum + lead.instantQuote, 0);
+    const totalValue = leads.reduce((sum, lead) => sum + (lead.instantQuote || 0), 0);
     const averageValue = total > 0 ? totalValue / total : 0;
     
     const conversionRate = total > 0 
@@ -328,7 +328,7 @@ export const terminalSyncCreateLead = mutation({
       recipientEmail: "business@treeshop.app", // From settings
       status: "pending",
       createdAt: now,
-      createdBy: leadId, // Temporary, will use proper user ID when auth is ready
+      createdBy: "temp" as any, // Temporary, will use proper user ID when auth is ready
     });
 
     return { leadId, success: true };

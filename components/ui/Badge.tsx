@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 interface BadgeProps {
   children: ReactNode;
-  variant?: "success" | "warning" | "error" | "info" | "default" | "purple" | "mobile" | "hot" | "new";
+  variant?: "success" | "warning" | "error" | "info" | "default" | "secondary" | "purple" | "mobile" | "hot" | "new";
   size?: "sm" | "md" | "lg";
   className?: string;
   pulse?: boolean;
@@ -27,6 +27,7 @@ export default function Badge({
     warning: "bg-[var(--light-orange)] text-[var(--font-on-accent)] border-[var(--light-orange)]",
     error: "bg-[var(--hot-red)] text-[var(--accent-white)] border-[var(--hot-red)]",
     info: "bg-[var(--soft-blue)] text-[var(--font-on-accent)] border-[var(--soft-blue)]",
+    secondary: "bg-[var(--medium-gray)] text-[var(--font-secondary)] border-[var(--medium-gray)]",
     purple: "bg-purple-500 text-[var(--accent-white)] border-purple-500",
     default: "bg-[var(--soft-gray)] text-[var(--font-secondary)] border-[var(--medium-gray)]",
     mobile: "bg-[var(--accent-green)] text-[var(--font-on-accent)] border-[var(--accent-green)] font-semibold",

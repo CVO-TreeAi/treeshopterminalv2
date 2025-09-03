@@ -30,9 +30,9 @@ export default function TimeTrackingPage() {
   const [isTracking, setIsTracking] = useState(false);
   
   // Get active work orders and time entries
-  const todaysWorkOrders = useQuery(api.workOrders.getTodaysWorkOrders) || [];
-  const activeTimeEntries = useQuery(api.timeTracking.getActiveTimeEntries) || [];
-  const currentUser = useQuery(api.auth.getCurrentUser) || null;
+  const todaysWorkOrders = useQuery(api.workOrders.getTodaysWorkOrders, {}) || [];
+  const activeTimeEntries = useQuery(api.timeTracking.getActiveTimeEntries, {}) || [];
+  const currentUser = useQuery(api.auth.getCurrentUser, {}) || null;
   
   // Mutations for time tracking
   const startTimeEntry = useMutation(api.timeTracking.startTimeEntry);

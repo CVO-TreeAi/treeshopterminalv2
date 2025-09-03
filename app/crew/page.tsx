@@ -26,9 +26,9 @@ export default function CrewPage() {
   const [activeTimeEntry, setActiveTimeEntry] = useState<string | null>(null);
   
   // Get today's work orders and active time entries
-  const todaysWorkOrders = useQuery(api.workOrders.getTodaysWorkOrders) || TREESHOP_BUSINESS_DATA.activeProjects;
-  const activeTimeEntries = useQuery(api.timeTracking.getActiveTimeEntries) || [];
-  const currentUser = useQuery(api.auth.getCurrentUser) || null;
+  const todaysWorkOrders = useQuery(api.workOrders.getTodaysWorkOrders, {}) || TREESHOP_BUSINESS_DATA.activeProjects;
+  const activeTimeEntries = useQuery(api.timeTracking.getActiveTimeEntries, {}) || [];
+  const currentUser = useQuery(api.auth.getCurrentUser, {}) || null;
   
   // Real TreeShop crew data
   const crewMembers: CrewMember[] = TREESHOP_BUSINESS_DATA.crew.map(crew => ({
@@ -136,7 +136,7 @@ export default function CrewPage() {
             </AppGridItem>
           ) : (
             todaysWorkOrders.map((workOrder) => (
-              <AppGridItem key={workOrder.id || workOrder._id}>
+              <AppGridItem key={(workOrder as any)._id || (workOrder as any).id}>
                 <Card 
                   interactive
                   padding="md"
@@ -150,9 +150,9 @@ export default function CrewPage() {
                       <div className="text-[var(--font-secondary)] text-sm">
                         {workOrder.customerName}
                       </div>
-                      {workOrder.phase && (
+                      {(workOrder as any).phase && (
                         <div className="text-[var(--accent-green)] text-xs font-medium mt-1">
-                          {workOrder.phase}
+                          {(workOrder as any).phase}
                         </div>
                       )}
                     </div>
@@ -174,10 +174,10 @@ export default function CrewPage() {
                       <span>📏</span>
                       <span className="font-semibold">{workOrder.workAreaAcreage} acres</span>
                     </div>
-                    {workOrder.totalValue && (
+                    {(workOrder as any).totalValue && (
                       <div className="flex items-center gap-2 text-[var(--amber)] font-medium">
                         <span>💰</span>
-                        <span>${workOrder.totalValue.toLocaleString()}</span>
+                        <span>${(workOrder as any).totalValue.toLocaleString()}</span>
                       </div>
                     )}
                     {workOrder.assignedCrew && (
@@ -186,17 +186,17 @@ export default function CrewPage() {
                         <span>{workOrder.assignedCrew}</span>
                       </div>
                     )}
-                    {workOrder.progress > 0 && (
+                    {(workOrder as any).progress > 0 && (
                       <div className="flex items-center gap-2">
                         <span>📊</span>
                         <div className="flex-1 bg-[var(--soft-gray)] rounded-full h-2">
                           <div 
                             className="bg-[var(--accent-green)] h-2 rounded-full transition-all"
-                            style={{ width: `${workOrder.progress}%` }}
+                            style={{ width: `${(workOrder as any).progress}%` }}
                           ></div>
                         </div>
                         <span className="text-[var(--accent-green)] font-medium text-xs">
-                          {workOrder.progress}%
+                          {(workOrder as any).progress}%
                         </span>
                       </div>
                     )}
@@ -208,7 +208,7 @@ export default function CrewPage() {
                         variant="primary" 
                         size="sm" 
                         fullWidth
-                        onClick={() => setSelectedWorkOrder(workOrder._id)}
+                        onClick={() => setSelectedWorkOrder((workOrder as any)._id || (workOrder as any).id)}
                       >
                         🚀 Start Work
                       </Button>

@@ -74,7 +74,7 @@ export default function WorkOrdersPage() {
 
   useEffect(() => {
     if (workOrdersData) {
-      setWorkOrders(workOrdersData);
+      setWorkOrders(workOrdersData as any);
       setLoading(false);
     }
   }, [workOrdersData]);
